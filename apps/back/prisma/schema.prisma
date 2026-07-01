@@ -43,6 +43,7 @@ model User {
   conversations   Conversation[]
   nutritionPlans  NutritionPlan[]
   mealLogs        MealLog[]
+  waterLogs       WaterLog[]
 
   @@map("users")
 }
@@ -125,4 +126,16 @@ model NutritionPlan {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("nutrition_plans")
+}
+
+model WaterLog {
+  id        String   @id @default(uuid())
+  userId    String
+  amount    Float
+  date      DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("water_logs")
 }
