@@ -1,0 +1,12 @@
+{
+  "name": "healis",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "description": "Application de suivi pour personnes atteintes de TCA",
+  "author": "Illona",
+  "license": "ISC"
+}

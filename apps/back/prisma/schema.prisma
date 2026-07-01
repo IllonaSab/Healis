@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Plan {
+  FREE
+  PREMIUM
+}
+
+enum Role {
+  USER
+  ASSISTANT
+}
+
+enum NutritionStatus {
+  LOCKED
+  AVAILABLE
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum MealType {
+  PETIT_DEJEUNER
+  DEJEUNER
+  EN_CAS
+  DINER
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  firstName String?
+  plan      Plan     @default(FREE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  emotionLogs     EmotionLog[]
+  conversations   Conversation[]
+  nutritionPlans  NutritionPlan[]
+  mealLogs        MealLog[]
+
+  @@map("users")
+}
+
+model EmotionLog {
+  id         String   @id @default(uuid())
+  userId     String
+  emotion    String
+  intensity  Int
+  sensations String[]
+  note       String?
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("emotion_logs")
+}
+
+model Recipe {
+  id          String   @id @default(uuid())
+  title       String
+  ingredients String[]
+  steps       String[]
+  isPremium   Boolean  @default(false)
+  tags        String[]
+  createdAt   DateTime @default(now())
+
+  mealLogs MealLog[]
+
+  @@map("recipes")
+}
+
+model MealLog {
+  id          String    @id @default(uuid())
+  userId      String
+  recipeId    String?
+  mealType    MealType
+  title       String
+  description String?
+  eaten       Boolean   @default(false)
+  date        DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe Recipe? @relation(fields: [recipeId], references: [id])
+
+  @@map("meal_logs")
+}
+
+model Conversation {
+  id        String   @id @default(uuid())
+  userId    String
+  createdAt DateTime @default(now())
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id             String   @id @default(uuid())
+  conversationId String
+  role           Role
+  content        String
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+model NutritionPlan {
+  id        String          @id @default(uuid())
+  userId    String
+  status    NutritionStatus @default(LOCKED)
+  startedAt DateTime?
+  createdAt DateTime        @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("nutrition_plans")
+}
