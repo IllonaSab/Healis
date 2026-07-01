@@ -4,6 +4,7 @@ import 'dotenv/config';
 import { prisma } from './db.js';
 import { authMiddleware } from './middlewares/auth.middleware.js';
 import authRouter from './routes/auth.routes.js';
+import emotionLogsRouter from './routes/emotionLogs.routes.js';
 import mealLogsRouter from './routes/mealLogs.routes.js';
 
 const app = express();
@@ -25,6 +26,7 @@ app.get('/health/db', async (req, res) => {
 
 app.use('/auth', authRouter);
 app.use('/meal-logs', authMiddleware, mealLogsRouter);
+app.use('/emotion-logs', authMiddleware, emotionLogsRouter);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
