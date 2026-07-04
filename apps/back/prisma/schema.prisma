@@ -55,6 +55,7 @@ model EmotionLog {
   intensity  Int
   sensations String[]
   note       String?
+  date       DateTime @default(now())  // ← ajouter ce champ
   createdAt  DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

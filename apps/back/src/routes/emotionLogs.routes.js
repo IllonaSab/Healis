@@ -3,22 +3,21 @@ import { prisma } from '../db.js';
 
 const router = express.Router();
 
-// GET /emotion-logs?date=2026-06-30
 router.get('/', async (req, res) => {
   try {
     const userId = req.userId;
     const { date } = req.query;
 
-    const targetDate = date ? new Date(date) : new Date();
-    const startOfDay = new Date(new Date(targetDate).setHours(0, 0, 0, 0));
-    const endOfDay = new Date(new Date(targetDate).setHours(23, 59, 59, 999));
+    const dateStr = date || new Date().toISOString().split('T')[0];
+    const startOfDay = new Date(`${dateStr}T00:00:00.000Z`);
+    const endOfDay = new Date(`${dateStr}T23:59:59.999Z`);
 
     const logs = await prisma.emotionLog.findMany({
       where: {
         userId,
-        createdAt: { gte: startOfDay, lte: endOfDay },
+        date: { gte: startOfDay, lte: endOfDay },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { date: 'desc' },
     });
 
     res.json(logs);
@@ -27,11 +26,10 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST /emotion-logs
 router.post('/', async (req, res) => {
   try {
     const userId = req.userId;
-    const { emotion, intensity, sensations, note } = req.body;
+    const { emotion, intensity, sensations, note, date } = req.body;
 
     if (!emotion) {
       return res.status(400).json({ message: 'emotion est requis' });
@@ -44,6 +42,7 @@ router.post('/', async (req, res) => {
         intensity: intensity ?? 5,
         sensations: sensations ?? [],
         note: note ?? null,
+        date: date ? new Date(`${date}T12:00:00.000Z`) : new Date(),
       },
     });
 
@@ -53,7 +52,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-// DELETE /emotion-logs/:id
 router.delete('/:id', async (req, res) => {
   try {
     await prisma.emotionLog.delete({ where: { id: req.params.id } });

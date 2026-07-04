@@ -8,7 +8,6 @@ import emotionLogsRouter from './routes/emotionLogs.routes.js';
 import mealLogsRouter from './routes/mealLogs.routes.js';
 import waterLogsRouter from './routes/waterLogs.routes.js';
 
-
 const app = express();
 app.use(cors());
 app.use(express.json());
