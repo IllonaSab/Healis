@@ -30,7 +30,7 @@ app.use('/auth', authRouter);
 app.use('/chat', authMiddleware, chatRouter);
 app.use('/meal-logs', authMiddleware, mealLogsRouter);
 app.use('/emotion-logs', authMiddleware, emotionLogsRouter);
-app.use('/water-logs', authMiddleware, waterLogsRouter);
+app.use('/tracker-logs', authMiddleware, waterLogsRouter);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
