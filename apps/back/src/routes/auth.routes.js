@@ -8,7 +8,7 @@ const router = express.Router();
 // POST /auth/register
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, firstName, objectif } = req.body;
+    const { email, password, firstName } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: 'Email et mot de passe requis' });
@@ -22,8 +22,8 @@ router.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await prisma.user.create({
-  data: { email, password: hashedPassword, firstName, objectif },
-});
+      data: { email, password: hashedPassword, firstName },
+    });
 
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
       expiresIn: '7d',
@@ -71,3 +71,51 @@ router.post('/login', async (req, res) => {
 });
 
 export default router;
+
+// POST /auth/google
+router.post('/google', async (req, res) => {
+  try {
+    const { accessToken } = req.body;
+
+    if (!accessToken) {
+      return res.status(400).json({ message: 'accessToken requis' });
+    }
+
+    // Récupérer les infos utilisateur depuis Google
+    const googleRes = await fetch('https://www.googleapis.com/userinfo/v2/me', {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    const googleUser = await googleRes.json();
+
+    if (!googleUser.email) {
+      return res.status(401).json({ message: 'Token Google invalide' });
+    }
+
+    // Chercher ou créer l'utilisateur
+    let user = await prisma.user.findUnique({
+      where: { email: googleUser.email },
+    });
+
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          email: googleUser.email,
+          firstName: googleUser.given_name || '',
+          password: '',
+        },
+      });
+    }
+
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
+      expiresIn: '7d',
+    });
+
+    res.json({
+      token,
+      user: { id: user.id, email: user.email, firstName: user.firstName, plan: user.plan },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
