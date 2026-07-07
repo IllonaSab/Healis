@@ -8,6 +8,7 @@ import chatRouter from './routes/chat.routes.js';
 import emotionLogsRouter from './routes/emotionLogs.routes.js';
 import mealLogsRouter from './routes/mealLogs.routes.js';
 import waterLogsRouter from './routes/waterLogs.routes.js';
+import phrasesRouter from './routes/phrases.routes.js';
 
 const app = express();
 app.use(cors());
@@ -31,6 +32,7 @@ app.use('/chat', authMiddleware, chatRouter);
 app.use('/meal-logs', authMiddleware, mealLogsRouter);
 app.use('/emotion-logs', authMiddleware, emotionLogsRouter);
 app.use('/tracker-logs', authMiddleware, waterLogsRouter);
+app.use('/phrases', phrasesRouter);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

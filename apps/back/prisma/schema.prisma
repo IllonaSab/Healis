@@ -140,3 +140,12 @@ model WaterLog {
 
   @@map("water_logs")
 }
+
+model Phrase {
+  id        String   @id @default(uuid())
+  day       Int      // 0 = dimanche, 1 = lundi ... 6 = samedi
+  content   String
+  createdAt DateTime @default(now())
+
+  @@map("phrases")
+}
