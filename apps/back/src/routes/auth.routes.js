@@ -8,7 +8,7 @@ const router = express.Router();
 // POST /auth/register
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, firstName } = req.body;
+    const { email, password, firstName, objectif } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: 'Email et mot de passe requis' });
@@ -22,8 +22,8 @@ router.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await prisma.user.create({
-      data: { email, password: hashedPassword, firstName },
-    });
+  data: { email, password: hashedPassword, firstName, objectif },
+});
 
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
       expiresIn: '7d',
