@@ -1,0 +1,57 @@
+name: CI — Healis
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-backend:
+    name: Tests backend
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: healis_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/healis_test
+      JWT_SECRET: test_secret_for_ci_only
+      MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+      NODE_OPTIONS: --experimental-vm-modules
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate Prisma Client
+        working-directory: apps/back
+        run: npx prisma generate
+
+      - name: Push Prisma schema
+        working-directory: apps/back
+        run: npx prisma db push
+
+      - name: Run tests
+        run: npx jest --testPathPatterns=apps/back/src/__tests__ --rootDir=apps/back
