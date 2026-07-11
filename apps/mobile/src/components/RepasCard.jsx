@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Image,
   Modal,
-  TextInput,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
@@ -75,6 +74,7 @@ export default function RepasCard({
         onPress={onMarkEaten}
         variant={eaten ? 'primaryDark' : 'primary'}
         size="full"
+        disabled={isEditing}
       />
 
       <Modal visible={isEditing} animationType="slide" transparent>
@@ -107,10 +107,13 @@ export default function RepasCard({
               disabled={!draftTitle.trim()}
               size="full"
             />
-
-            <TouchableOpacity style={styles.cancelButton} onPress={() => setIsEditing(false)}>
-              <Text style={styles.cancelText}>Annuler</Text>
-            </TouchableOpacity>
+            <Button
+              label="Annuler"
+              onPress={() => setIsEditing(false)}
+              disabled={!draftTitle.trim()}
+              size="full"
+            />
+            
           </View>
         </KeyboardAvoidingView>
       </Modal>
