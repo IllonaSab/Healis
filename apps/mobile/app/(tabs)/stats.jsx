@@ -5,6 +5,7 @@ import { colors } from '../../src/theme/colors';
 export default function Stats() {
   return (
     <SafeAreaView style={styles.container}>
+      {/* Écran placeholder pour la future page Statistiques */}
       <Text style={styles.title}>Statistiques</Text>
       <Text style={styles.subtitle}>Bientôt disponible...</Text>
     </SafeAreaView>
@@ -12,20 +13,24 @@ export default function Stats() {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.background,
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    title: {
-        fontSize: 20,
-        fontWeight: '700',
-        color: colors.textPrimary
-    },
-    subtitle: {
-        fontSize: 14,
-        color: colors.textSecondary,
-        marginTop: 8
-    },
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+    // Centre le contenu verticalement et horizontalement
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.textPrimary,
+    // Titre principal
+  },
+  subtitle: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    marginTop: 8,
+    // Petit texte d’information
+  },
 });
+

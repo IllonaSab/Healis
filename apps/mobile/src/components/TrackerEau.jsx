@@ -8,53 +8,85 @@ const STEP = 0.5;
 
 export default function TrackerEau({ selectedDate = new Date() }) {
   const [amount, setAmount] = useState(0);
+  // Quantité totale d’eau bue (en litres)
+
   const [logs, setLogs] = useState([]);
+  // Historique des ajouts (chaque log = +STEP)
 
   useEffect(() => {
     fetchToday();
   }, [selectedDate]);
+  // Recharge les données quand la date change
+
 
   const fetchToday = async () => {
     try {
-      const dateStr = typeof selectedDate === 'string'
-        ? selectedDate
-        : `${selectedDate.getFullYear()}-${String(selectedDate.getMonth()+1).padStart(2,'0')}-${String(selectedDate.getDate()).padStart(2,'0')}`;
+      const dateStr =
+        typeof selectedDate === 'string'
+          ? selectedDate
+          : `${selectedDate.getFullYear()}-${String(selectedDate.getMonth()+1).padStart(2,'0')}-${String(selectedDate.getDate()).padStart(2,'0')}`;
+      // Format YYYY-MM-DD si la date n’est pas déjà une string
+
       const data = await api.get(`/tracker-logs?date=${dateStr}`);
+      // Récupère total + liste des logs pour la date
+
       setAmount(data.total);
       setLogs(data.logs);
-    } catch (error) {}
-  };
-
-  const increment = async () => {
-    const next = parseFloat((amount + STEP).toFixed(1));
-    setAmount(next);
-    try {
-      const log = await api.post('/tracker-logs', { amount: STEP });
-      setLogs((prev) => [...prev, log]);
     } catch (error) {
-      setAmount(amount);
+      // En cas d’erreur : on ne modifie rien
     }
   };
 
-  const decrement = async () => {
+
+    const increment = async () => {
+    const next = parseFloat((amount + STEP).toFixed(1));
+    setAmount(next);
+    // Mise à jour optimiste de l’UI
+
+    try {
+      const log = await api.post('/tracker-logs', { amount: STEP });
+      // Enregistre un nouveau log côté backend
+
+      setLogs((prev) => [...prev, log]);
+      // Ajoute le log localement
+    } catch (error) {
+      setAmount(amount);
+      // Si erreur : rollback
+    }
+  };
+
+
+    const decrement = async () => {
     if (amount <= 0 || logs.length === 0) return;
+    // Impossible de retirer si rien n’a été ajouté
+
     const lastLog = logs[logs.length - 1];
+    // On retire toujours le dernier log ajouté
+
     const next = parseFloat((amount - STEP).toFixed(1));
     setAmount(Math.max(0, next));
     setLogs((prev) => prev.slice(0, -1));
+    // Mise à jour optimiste
+
     try {
       await api.delete(`/tracker-logs/${lastLog.id}`);
+      // Supprime le log côté backend
     } catch (error) {
+      // Rollback si erreur
       setAmount(amount);
       setLogs((prev) => [...prev, lastLog]);
     }
   };
 
-  return (
+
+    return (
     <View style={styles.container}>
       <Text style={styles.title}>Hydratation — {amount}L / 2L</Text>
+      {/* Affiche la progression du jour */}
 
       <View style={styles.row}>
+
+        {/* Bouton - */}
         <TouchableOpacity
           style={styles.button}
           onPress={decrement}
@@ -68,6 +100,7 @@ export default function TrackerEau({ selectedDate = new Date() }) {
           <Text style={[styles.buttonText, amount <= 0 && styles.buttonTextDisabled]}>-</Text>
         </TouchableOpacity>
 
+        {/* Bouteille + quantité */}
         <View
           style={styles.bottleColumn}
           accessible={true}
@@ -84,6 +117,7 @@ export default function TrackerEau({ selectedDate = new Date() }) {
           <Text style={styles.amountLabel}>Eau {amount}L</Text>
         </View>
 
+        {/* Bouton + */}
         <TouchableOpacity
           style={styles.button}
           onPress={increment}
@@ -94,10 +128,12 @@ export default function TrackerEau({ selectedDate = new Date() }) {
         >
           <Text style={styles.buttonText}>+</Text>
         </TouchableOpacity>
+
       </View>
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {

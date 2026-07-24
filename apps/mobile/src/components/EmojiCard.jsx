@@ -8,6 +8,8 @@ const MOODS = [
   { id: 'mitige', image: require('../../assets/emojis/mitige.png'), label: 'Mitigé(e)' },
   { id: 'triste', image: require('../../assets/emojis/triste.png'), label: 'Triste' },
 ];
+// Liste des humeurs disponibles + image + label
+
 
 export default function EmojiCard({ selectedMood, onSelectMood }) {
   return (
@@ -16,12 +18,15 @@ export default function EmojiCard({ selectedMood, onSelectMood }) {
       accessible={true}
       accessibilityLabel="Comment te sens-tu aujourd'hui ?"
       accessibilityRole="radiogroup"
+      // Le composant est annoncé comme un groupe de boutons radio pour l’accessibilité
     >
       <Text style={styles.title}>Comment te sens-tu aujourd hui ?</Text>
 
       <View style={styles.moodsRow}>
         {MOODS.map((mood) => {
           const isSelected = mood.id === selectedMood;
+          // Détermine si l’humeur affichée est celle sélectionnée
+
           return (
             <TouchableOpacity
               key={mood.id}
@@ -32,11 +37,30 @@ export default function EmojiCard({ selectedMood, onSelectMood }) {
               accessibilityLabel={mood.label}
               accessibilityRole="radio"
               accessibilityState={{ selected: isSelected }}
+              // Chaque humeur est un bouton radio accessible
             >
-              <View style={[styles.emojiCircle, isSelected && styles.emojiCircleSelected]}>
-                <Image source={mood.image} style={styles.emojiImage} resizeMode="contain" />
+              <View
+                style={[
+                  styles.emojiCircle,
+                  isSelected && styles.emojiCircleSelected,
+                  // Cercle coloré si sélectionné
+                ]}
+              >
+                <Image
+                  source={mood.image}
+                  style={styles.emojiImage}
+                  resizeMode="contain"
+                />
+                {/* Affichage de l’emoji */}
               </View>
-              <Text style={[styles.moodLabel, isSelected && styles.moodLabelSelected]}>
+
+              <Text
+                style={[
+                  styles.moodLabel,
+                  isSelected && styles.moodLabelSelected,
+                  // Label mis en avant si sélectionné
+                ]}
+              >
                 {mood.label}
               </Text>
             </TouchableOpacity>
@@ -45,6 +69,7 @@ export default function EmojiCard({ selectedMood, onSelectMood }) {
       </View>
 
       <View style={styles.divider} />
+      {/* Ligne de séparation visuelle */}
     </View>
   );
 }

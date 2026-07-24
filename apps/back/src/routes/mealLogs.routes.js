@@ -1,18 +1,23 @@
-import express from 'express';
-import { prisma } from '../db.js';
-
 const router = express.Router();
+// Router pour toutes les routes /meal-logs
 
-// GET /meal-logs?date=2026-06-30
+
+// GET /meal-logs?date=YYYY-MM-DD
 // Récupère les repas du jour pour l'utilisateur connecté
 router.get('/', async (req, res) => {
   try {
-    const userId = req.userId; // injecté par le middleware d'auth (à brancher)
+    const userId = req.userId;
+    // Injecté par le middleware JWT → identifie l’utilisateur
+
     const { date } = req.query;
+    // Permet de filtrer les repas d’une date spécifique
 
     const dateStr = date || new Date().toISOString().split('T')[0];
+    // Si aucune date fournie → utilise la date du jour
+
     const startOfDay = new Date(`${dateStr}T00:00:00.000Z`);
     const endOfDay = new Date(`${dateStr}T23:59:59.999Z`);
+    // Délimite la journée complète pour la recherche
 
     const mealLogs = await prisma.mealLog.findMany({
       where: {
@@ -21,6 +26,7 @@ router.get('/', async (req, res) => {
       },
       orderBy: { date: 'asc' },
     });
+    // Récupère tous les repas du jour pour cet utilisateur
 
     res.json(mealLogs);
   } catch (error) {
@@ -28,15 +34,20 @@ router.get('/', async (req, res) => {
   }
 });
 
+
 // POST /meal-logs
-// Crée un repas (suggéré via recipeId OU saisi librement par l'utilisateur)
+// Crée un repas (manuel ou basé sur une recette)
 router.post('/', async (req, res) => {
   try {
     const userId = req.userId;
+    // Identifie l’utilisateur connecté
+
     const { mealType, title, description, recipeId, date } = req.body;
+    // Données du repas envoyées par le client
 
     if (!mealType || !title) {
       return res.status(400).json({ message: 'mealType et title sont requis' });
+      // Validation minimale → type + titre obligatoires
     }
 
     const mealLog = await prisma.mealLog.create({
@@ -45,23 +56,26 @@ router.post('/', async (req, res) => {
         mealType,
         title,
         description,
-        recipeId: recipeId || null,
-        date: date ? new Date(date) : new Date(),
+        recipeId: recipeId || null,   // Optionnel
+        date: date ? new Date(date) : new Date(), // Date fournie ou date actuelle
       },
     });
 
     res.status(201).json(mealLog);
+    // Retourne le repas créé
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
+
 // PATCH /meal-logs/:id
-// Met à jour un repas (titre/description modifiés par l'utilisateur, ou marqué comme mangé)
+// Met à jour un repas (titre, description, ou statut "mangé")
 router.patch('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { title, description, eaten } = req.body;
+    // Champs modifiables
 
     const mealLog = await prisma.mealLog.update({
       where: { id },
@@ -71,6 +85,7 @@ router.patch('/:id', async (req, res) => {
         ...(eaten !== undefined && { eaten }),
       },
     });
+    // Mise à jour partielle → uniquement les champs envoyés
 
     res.json(mealLog);
   } catch (error) {
@@ -78,12 +93,18 @@ router.patch('/:id', async (req, res) => {
   }
 });
 
+
 // DELETE /meal-logs/:id
+// Supprime un repas
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
+
     await prisma.mealLog.delete({ where: { id } });
+    // Suppression du repas
+
     res.status(204).send();
+    // 204 → succès sans contenu
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

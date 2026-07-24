@@ -7,7 +7,12 @@ const LOGO = require('../../assets/tabs/header-logo.png');
 export default function Header() {
   return (
     <View style={styles.container}>
-      <Image source={LOGO} style={styles.logo} resizeMode="contain" />
+      {/* Affichage du logo dans un header simple */}
+      <Image
+        source={LOGO}
+        style={styles.logo}
+        resizeMode="contain"
+      />
     </View>
   );
 }
@@ -22,9 +27,13 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     borderBottomWidth: 1,
     borderBottomColor: colors.accent,
+    // Header minimaliste : fond blanc + ligne d’accent en bas
   },
+
   logo: {
     width: 285,
     height: 48,
+    // Dimensions fixes pour un rendu stable du logo
   },
 });
+

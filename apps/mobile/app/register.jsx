@@ -23,6 +23,7 @@ const OBJECTIFS = [
   { id: 'réconciliation avec la nourriture', label: 'Réconciliation avec la nourriture' },
   { id: 'Équilibre', label: 'Équilibre' },
 ];
+// Liste des intentions proposées à l’utilisateur
 
 export default function Register() {
   const { register } = useAuth();
@@ -59,31 +60,68 @@ export default function Register() {
       <KeyboardAvoidingView
         style={common.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        // Remonte le formulaire sur iOS quand le clavier apparaît
       >
         <ScrollView
           contentContainerStyle={styles.container}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
+          // Permet de garder le focus sur les inputs même en scrollant
         >
           <View style={common.logoContainer}>
-            <Image source={require('../assets/tabs/header-logo.png')} style={common.logo} resizeMode="contain" />
+            <Image
+              source={require('../assets/tabs/header-logo.png')}
+              style={common.logo}
+              resizeMode="contain"
+            />
+            {/* Logo de l’application */}
           </View>
 
           <View style={styles.stepsRow}>
             {[1, 2, 3].map((s) => (
               <View key={s} style={[styles.stepDot, s <= step && styles.stepDotActive]} />
             ))}
+            {/* Indicateur visuel des étapes */}
           </View>
 
           <View style={common.card}>
+            {/* Carte contenant les étapes du formulaire */}
+
             {step === 1 && (
               <>
                 <Text style={common.screenTitle}>Crée ton compte</Text>
-                <Input value={lastName} onChangeText={setLastName} placeholder="Nom" autoCapitalize="words" />
-                <Input value={firstName} onChangeText={setFirstName} placeholder="Prénom" autoCapitalize="words" />
-                <Input value={email} onChangeText={setEmail} placeholder="Adresse email" autoCapitalize="none" keyboardType="email-address" />
-                <Input value={password} onChangeText={setPassword} placeholder="Mot de passe" secureTextEntry />
+
+                <Input
+                  value={lastName}
+                  onChangeText={setLastName}
+                  placeholder="Nom"
+                  autoCapitalize="words"
+                />
+
+                <Input
+                  value={firstName}
+                  onChangeText={setFirstName}
+                  placeholder="Prénom"
+                  autoCapitalize="words"
+                />
+
+                <Input
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="Adresse email"
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                />
+
+                <Input
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="Mot de passe"
+                  secureTextEntry
+                />
+
                 <Button label="Suivant" onPress={handleNext} size="full" />
+
                 <TouchableOpacity onPress={() => router.replace('/login')}>
                   <Text style={common.switchText}>Déjà un compte ? Se connecter</Text>
                 </TouchableOpacity>
@@ -91,44 +129,71 @@ export default function Register() {
             )}
 
             {step === 2 && (
-            <>
+              <>
                 <Text style={styles.message}>Bienvenue {firstName}</Text>
+                {/* Message personnalisé */}
+
                 <Text style={common.screenSubtitle}>
-                Ici, pas de jugement — juste un espace de bienveillance pour t accompagner dans ton parcours.
+                  Ici, pas de jugement — juste un espace de bienveillance pour t accompagner dans ton parcours.
                 </Text>
+
                 <Button label="Suivant" onPress={handleNext} size="full" />
+
                 <Button
-                label="Retour"
-                onPress={() => setStep(1)}
-                variant="secondary"
-                size="full"
+                  label="Retour"
+                  onPress={() => setStep(1)}
+                  variant="secondary"
+                  size="full"
                 />
-            </>
+              </>
             )}
 
             {step === 3 && (
-            <>
+              <>
                 <Text style={common.screenTitle}>Ton objectif</Text>
                 <Text style={common.screenSubtitle}>
-                Choisis l intention qui te fait le plus de sens aujourd hui.
+                  Choisis l intention qui te fait le plus de sens aujourd hui.
                 </Text>
+
                 {OBJECTIFS.map((obj) => (
-                <TouchableOpacity
+                  <TouchableOpacity
                     key={obj.id}
-                    style={[styles.objectifButton, objectif === obj.id && styles.objectifButtonSelected]}
+                    style={[
+                      styles.objectifButton,
+                      objectif === obj.id && styles.objectifButtonSelected,
+                    ]}
                     onPress={() => setObjectif(obj.id)}
                     activeOpacity={0.7}
-                >
-                    <Text style={[styles.objectifText, objectif === obj.id && styles.objectifTextSelected]}>
-                    {obj.label}
+                    // Sélection de l’objectif
+                  >
+                    <Text
+                      style={[
+                        styles.objectifText,
+                        objectif === obj.id && styles.objectifTextSelected,
+                      ]}
+                    >
+                      {obj.label}
                     </Text>
-                </TouchableOpacity>
+                  </TouchableOpacity>
                 ))}
-                <Button label={isSubmitting ? '...' : 'Commencer'} onPress={handleRegister} disabled={isSubmitting} size="full" />
-                <Button label="Retour" onPress={() => setStep(2)} variant="secondary" size="full" />
-            </>
+
+                <Button
+                  label={isSubmitting ? '...' : 'Commencer'}
+                  onPress={handleRegister}
+                  disabled={isSubmitting}
+                  size="full"
+                  // Bouton final d’inscription
+                />
+
+                <Button
+                  label="Retour"
+                  onPress={() => setStep(2)}
+                  variant="secondary"
+                  size="full"
+                />
+              </>
             )}
-          </View>
+            </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

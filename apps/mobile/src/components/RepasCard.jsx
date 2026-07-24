@@ -27,47 +27,72 @@ export default function RepasCard({
   onUpdateMeal,
 }) {
   const [isEditing, setIsEditing] = useState(false);
+  // État du modal d’édition
+
   const [draftTitle, setDraftTitle] = useState(title || '');
   const [draftDescription, setDraftDescription] = useState(description || '');
+  // Champs temporaires utilisés dans le modal
 
   const handleOpen = () => {
+    // Ouvre le modal et recharge les valeurs actuelles
     setDraftTitle(title || '');
     setDraftDescription(description || '');
     setIsEditing(true);
   };
 
   const handleSave = () => {
+    // Enregistre uniquement si un titre est présent
     if (draftTitle.trim()) {
       onUpdateMeal?.(draftTitle.trim(), draftDescription.trim());
     }
     setIsEditing(false);
   };
 
-  const isEmpty = !title || title === 'Aucun repas renseigné' || title === 'Repas non détaillé';
+  const isEmpty =
+    !title ||
+    title === 'Aucun repas renseigné' ||
+    title === 'Repas non détaillé';
+  // Détermine si le repas n’a pas encore été renseigné
 
-  return (
+    return (
     <View style={styles.container}>
+
+      {/* --- En‑tête : nom du repas + statut + lien Modifier --- */}
       <View style={styles.headerRow}>
         <Text style={styles.mealLabel}>{mealLabel}</Text>
+
         <View style={styles.headerRight}>
           <Text style={styles.status}>{status}</Text>
+
           <TouchableOpacity onPress={handleOpen} hitSlop={8}>
             <Text style={styles.editLink}>Modifier</Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      <TouchableOpacity style={styles.descriptionRow} onPress={handleOpen} activeOpacity={0.7}>
-        <Image source={icon} style={styles.icon} resizeMode="contain" />
+
+        <TouchableOpacity
+        style={styles.descriptionRow}
+        onPress={handleOpen}
+        activeOpacity={0.7}
+      >
+        <Image
+          source={icon}
+          style={styles.icon}
+          resizeMode="contain"
+        />
+
         <View style={styles.descriptionText}>
           <Text style={[styles.title, isEmpty && styles.titleEmpty]}>
             {isEmpty ? 'Ajouter un aliment...' : title}
           </Text>
+
           {!isEmpty && description ? (
             <Text style={styles.subtitle}>{description}</Text>
           ) : null}
         </View>
       </TouchableOpacity>
+
 
       <Button
         label={eaten ? 'Repas marqué comme mangé' : "J'ai mangé ce repas"}
@@ -77,14 +102,19 @@ export default function RepasCard({
         disabled={isEditing}
       />
 
-      <Modal visible={isEditing} animationType="slide" transparent>
+
+            <Modal visible={isEditing} animationType="slide" transparent>
         <KeyboardAvoidingView
           style={styles.modalOverlay}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Modifier — {mealLabel}</Text>
 
+            <Text style={styles.modalTitle}>
+              Modifier — {mealLabel}
+            </Text>
+
+            {/* Champ titre */}
             <Text style={styles.inputLabel}>Nom du plat</Text>
             <Input
               value={draftTitle}
@@ -93,7 +123,10 @@ export default function RepasCard({
               autoFocus
             />
 
-            <Text style={styles.inputLabel}>Ingrédients / description</Text>
+            {/* Champ description */}
+            <Text style={styles.inputLabel}>
+              Ingrédients / description
+            </Text>
             <Input
               value={draftDescription}
               onChangeText={setDraftDescription}
@@ -101,25 +134,28 @@ export default function RepasCard({
               multiline
             />
 
+            {/* Boutons d’action */}
             <Button
               label="Enregistrer"
               onPress={handleSave}
               disabled={!draftTitle.trim()}
               size="full"
             />
+
             <Button
               label="Annuler"
               onPress={() => setIsEditing(false)}
               disabled={!draftTitle.trim()}
               size="full"
             />
-            
+
           </View>
         </KeyboardAvoidingView>
       </Modal>
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {

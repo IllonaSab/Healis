@@ -19,23 +19,39 @@ export default function Input({
   return (
     <TextInput
       style={[styles.input, multiline && styles.multiline, style]}
+      // Style de base + style multiline + style personnalisé
+
       value={value}
       onChangeText={onChangeText}
+      // Gestion du texte saisi
+
       placeholder={placeholder}
       placeholderTextColor={colors.gray}
+      // Placeholder + couleur
+
       secureTextEntry={secureTextEntry}
+      // Masque le texte (mot de passe)
+
       multiline={multiline}
       numberOfLines={numberOfLines}
+      // Active le mode texte multi‑lignes
+
       maxLength={maxLength}
+      // Limite de caractères
+
       autoFocus={autoFocus}
       autoCapitalize={autoCapitalize}
       keyboardType={keyboardType}
+      // Paramètres de saisie (clavier, auto‑capitalisation, focus)
+
       accessible={true}
       accessibilityLabel={accessibilityLabel || placeholder}
       accessibilityRole="search"
+      // Accessibilité : rôle "search" pour les lecteurs d’écran
     />
   );
 }
+
 
 const styles = StyleSheet.create({
   input: {
