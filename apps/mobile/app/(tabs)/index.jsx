@@ -60,6 +60,7 @@ export default function Dashboard() {
   }, [authLoading, user]);
 
 
+
   const fetchDataForDate = async (date) => {
     try {
       setIsLoadingMeals(true);

@@ -1,3 +1,6 @@
+import { Mistral } from '@mistralai/mistralai';
+import 'dotenv/config';
+
 const apiKey = process.env.MISTRAL_API_KEY;
 // Récupère la clé API depuis l'environnement
 
@@ -9,7 +12,6 @@ if (!apiKey) {
 
 const client = new Mistral({ apiKey });
 // Initialise le client Mistral avec la clé API
-
 
 async function testMistral() {
   try {

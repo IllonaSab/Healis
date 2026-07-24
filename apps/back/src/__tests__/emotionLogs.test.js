@@ -1,63 +1,61 @@
-import { describe, it, expect, beforeAll } from '@jest/globals';
-import request from 'supertest';
-import express from 'express';
-import cors from 'cors';
-import 'dotenv/config';
-import authRouter from '../routes/auth.routes.js';
-import emotionLogsRouter from '../routes/emotionLogs.routes.js';
-import { authMiddleware } from '../middlewares/auth.middleware.js';
+const request = require('supertest');
+const express = require('express');
+const cors = require('cors');
+
+// Importations des routes et middleware au format CommonJS
+const authRouter = require('../routes/auth.routes.js');
+const emotionLogsRouter = require('../routes/emotionLogs.routes.js');
+const { authMiddleware } = require('../middlewares/auth.middleware.js');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use('/auth', authRouter);  // routes publiques /auth
+app.use('/auth', authRouter);
 app.use('/emotion-logs', authMiddleware, emotionLogsRouter);
-// requête vers /emotion-logs --> authMiddleware
-// Si token absent → 401 , Si token invalide → 401
 
-const testEmail = `emotiontest_${Date.now()}@healis.fr`;  // Génère un email unique
-let authToken = '';  // Stocke le token JWT --> l'inscription
+const testEmail = `emotiontest_${Date.now()}@healis.fr`;
+let authToken = '';
 
-beforeAll(async () => {   // Avant tous les tests --> on crée un utilisateur pour obtenir un token valide
+beforeAll(async () => {
   const res = await request(app)
     .post('/auth/register')
     .send({ email: testEmail, password: 'Test1234!', firstName: 'Test' });
-  authToken = res.body.token;  // On récupère le token JWT
+  authToken = res.body.token;
 });
 
-describe('EmotionLogs — /emotion-logs', () => {  //tests --> routes protégées /emotion-logs
-  it('devrait créer un log d\'émotion', async () => {  // Si un log d'émotion à un token valide
+describe('EmotionLogs — /emotion-logs', () => {
+  it("devrait créer un log d'émotion", async () => {
     const res = await request(app)
-      .post('/emotion-logs')  // Route protégée
-      .set('Authorization', `Bearer ${authToken}`)  // Envoie le token dans le header Authorization --> authMiddleware va le vérifier
-      .send({ emotion: 'excellent', intensity: 5 });  // Body valide : emotion + intensity
-
-    expect(res.status).toBe(201);  // Le log doit être créé
-    expect(res.body.emotion).toBe('excellent');  // Vérifie que l'émotion enregistrée est bien
-  });
-
-  it('devrait récupérer les émotions du jour', async () => {  // Si les logs du jour à un token valide
-    const res = await request(app)
-      .get('/emotion-logs')  // Route protégée
-      .set('Authorization', `Bearer ${authToken}`);   // Token envoyé → authMiddleware laisse passer
-
-    expect(res.status).toBe(200);  // Récupération réussie 
-    expect(Array.isArray(res.body)).toBe(true);  // Le résultat doit être un tableau
-  });
-
-  it('devrait refuser sans émotion', async () => {  // Si manque "emotion"
-    const res = await request(app)
-      .post('/emotion-logs')   // Token OK → middleware laisse passer
+      .post('/emotion-logs')
       .set('Authorization', `Bearer ${authToken}`)
-      .send({ intensity: 5 });  // Body incomplet 
+      .send({ emotion: 'excellent', intensity: 5 });
 
-    expect(res.status).toBe(400);  // Le serveur renvoie une erreur 400
+    expect(res.status).toBe(201);
+    expect(res.body.emotion).toBe('excellent');
   });
 
-  it('devrait refuser sans token', async () => {   // Si une route protégée est appelée SANS token
+  it('devrait récupérer les émotions du jour', async () => {
     const res = await request(app)
-      .get('/emotion-logs');   // Aucun header Authorization → authMiddleware bloque
+      .get('/emotion-logs')
+      .set('Authorization', `Bearer ${authToken}`);
 
-    expect(res.status).toBe(401);  // Le middleware renvoie 401 (non autorisé)
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+  });
+
+  it('devrait refuser sans émotion', async () => {
+    const res = await request(app)
+      .post('/emotion-logs')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({ intensity: 5 });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('devrait refuser sans token', async () => {
+    const res = await request(app)
+      .get('/emotion-logs');
+
+    expect(res.status).toBe(401);
   });
 });

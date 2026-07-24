@@ -1,17 +1,23 @@
-import jwt from 'jsonwebtoken';
+const jwt = require('jsonwebtoken');
 
-export function authMiddleware(req, res, next) {  // Déclare le middleware d'authentification JWT
-  const authHeader = req.headers.authorization;  // Récupère le header "Authorization"
+function authMiddleware(req, res, next) {
+  const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {  // header = absent OU  "Bearer" --> token pas fourni ou mal formaté
-    return res.status(401).json({ message: 'Token manquant' }); // bloque l'accès → 401 Unauthorized
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ message: 'Token manquant' });
   }
-  const token = authHeader.split(' ')[1];  //le token --> après "Bearer "
+
+  const token = authHeader.split(' ')[1];
+
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);  // token invalide ou expiré --> une erreur 
-    req.userId = decoded.userId;  // Ajoute l'ID utilisateur
-    next();  // OK --> direction vers la route suivante
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.userId = decoded.userId;
+    next();
   } catch (error) {
-    return res.status(401).json({ message: 'Token invalide ou expiré' });  // vérification échoue → token invalide ou expiré → accès refusé
+    return res.status(401).json({ message: 'Token invalide ou expiré' });
   }
 }
+
+module.exports = {
+  authMiddleware,
+};
