@@ -231,11 +231,6 @@ export default function Dashboard() {
 
             <TrackerEau selectedDate={toDateStr(selectedDate)} />
             {/* Suivi de l’eau */}
-
-            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-              <Text style={styles.logoutText}>Se déconnecter</Text>
-            </TouchableOpacity>
-            {/* Bouton de déconnexion */}
           </>
         )}
       </ScrollView>
