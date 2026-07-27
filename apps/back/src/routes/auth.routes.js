@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { prisma } = require('../db.js');
+const { authMiddleware } = require('../middlewares/auth.middleware.js');
 
 const router = express.Router();
 
@@ -129,6 +130,54 @@ router.post('/google', async (req, res) => {
         objectif: user.objectif,
       },
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// PATCH /auth/password
+router.patch('/password', authMiddleware, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Champs manquants' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: req.userId } });
+
+    const isValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isValid) {
+      return res.status(401).json({ message: 'Mot de passe actuel incorrect' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({
+      where: { id: req.userId },
+      data: { password: hashedPassword },
+    });
+
+    res.json({ message: 'Mot de passe modifié avec succès' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// PATCH /auth/plan
+router.patch('/plan', authMiddleware, async (req, res) => {
+  try {
+    const { plan } = req.body;
+
+    if (!['FREE', 'PREMIUM'].includes(plan)) {
+      return res.status(400).json({ message: 'Plan invalide' });
+    }
+
+    const user = await prisma.user.update({
+      where: { id: req.userId },
+      data: { plan },
+    });
+
+    res.json({ message: 'Plan mis à jour', plan: user.plan });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
