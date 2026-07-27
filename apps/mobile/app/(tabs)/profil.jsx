@@ -14,7 +14,7 @@ import Button from '../../src/components/Button';
 
 export default function Profil() {
   const { user, logout } = useAuth();
-
+console.log('User profil:', user);
   const handleLogout = async () => {
     await logout();
     router.replace('/login');
