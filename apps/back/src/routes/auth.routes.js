@@ -8,7 +8,7 @@ const router = express.Router();
 // POST /auth/register
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, firstName } = req.body;
+    const { email, password, firstName, objectif } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: 'Email et mot de passe requis' });
@@ -22,7 +22,7 @@ router.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await prisma.user.create({
-      data: { email, password: hashedPassword, firstName },
+      data: { email, password: hashedPassword, firstName, objectif },
     });
 
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
@@ -31,7 +31,13 @@ router.post('/register', async (req, res) => {
 
     res.status(201).json({
       token,
-      user: { id: user.id, email: user.email, firstName: user.firstName, plan: user.plan },
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        plan: user.plan,
+        objectif: user.objectif,
+      },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -63,7 +69,13 @@ router.post('/login', async (req, res) => {
 
     res.json({
       token,
-      user: { id: user.id, email: user.email, firstName: user.firstName, plan: user.plan },
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        plan: user.plan,
+        objectif: user.objectif,
+      },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -79,7 +91,6 @@ router.post('/google', async (req, res) => {
       return res.status(400).json({ message: 'accessToken requis' });
     }
 
-    // Récupérer les infos utilisateur depuis Google
     const googleRes = await fetch('https://www.googleapis.com/userinfo/v2/me', {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
@@ -90,7 +101,6 @@ router.post('/google', async (req, res) => {
       return res.status(401).json({ message: 'Token Google invalide' });
     }
 
-    // Chercher ou créer l'utilisateur
     let user = await prisma.user.findUnique({
       where: { email: googleUser.email },
     });
@@ -111,7 +121,13 @@ router.post('/google', async (req, res) => {
 
     res.json({
       token,
-      user: { id: user.id, email: user.email, firstName: user.firstName, plan: user.plan },
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        plan: user.plan,
+        objectif: user.objectif,
+      },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
