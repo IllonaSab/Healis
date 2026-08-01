@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { color, spacing } from '../src/theme/colors';
+import { colors, spacing } from '../src/theme/colors';
 import { common } from '../src/theme/commonStyles';
 import Input from '../src/components/Input';
 import Button from '../src/components/Button';
@@ -32,9 +32,11 @@ export default function ForgotPassword() {
     }
     setIsSubmitting(true);
     try {
-      await api.post('/auth/forgot-password', { email });
+        await api.post('/auth/forgot-password', { email });
+        console.log('Email envoyé');
       setStep(2);
     } catch (error) {
+        console.error('Erreur:', error.message);
       Alert.alert('Erreur', error.message);
     } finally {
       setIsSubmitting(false);
@@ -88,10 +90,10 @@ export default function ForgotPassword() {
                   keyboardType="email-address"
                 />
                 <Button
-                  label={isSubmitting ? '...' : 'Envoyer le code'}
-                  onPress={handleSendCode}
-                  disabled={isSubmitting}
-                  size="full"
+                label={isSubmitting ? '...' : 'Envoyer le code'}
+                onPress={handleSendCode}
+                disabled={isSubmitting}
+                size="full"
                 />
               </>
             ) : (
