@@ -1,21 +1,11 @@
 const express = require('express');
 const crypto = require('crypto');
-const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
+const { Resend } = require('resend');
 const { prisma } = require('../db.js');
 
 const router = express.Router();
-
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  family: 4,
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // POST /auth/forgot-password
 router.post('/forgot-password', async (req, res) => {
@@ -41,8 +31,8 @@ router.post('/forgot-password', async (req, res) => {
       data: { resetToken: token, resetTokenExpiry: expiry },
     });
 
-    await transporter.sendMail({
-      from: `"Healis 🌱" <${process.env.EMAIL_USER}>`,
+    await resend.emails.send({
+      from: 'Healis <onboarding@resend.dev>',
       to: email,
       subject: 'Réinitialisation de ton mot de passe Healis',
       html: `
