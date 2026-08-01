@@ -52,7 +52,7 @@ router.get('/success', async (req, res) => {
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Paiement réussi - Healis</title>
+          <title>Paiement réussi - Healis </title>
         </head>
         <body style="font-family: Arial, sans-serif; text-align: center; padding: 60px 20px; background: #F5F5F5;">
           <div style="background: white; border-radius: 16px; padding: 40px; max-width: 400px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
