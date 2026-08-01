@@ -50,18 +50,23 @@ router.get('/success', async (req, res) => {
     res.send(`
       <html>
         <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Paiement réussi - Healis </title>
+            <meta charset="UTF-8">
+            <title>Paiement réussi - Healis</title>
+            <script>
+            // Ferme le navigateur après 3 secondes
+            setTimeout(() => {
+                window.close();
+            }, 3000);
+            </script>
         </head>
-        <body style="font-family: Arial, sans-serif; text-align: center; padding: 60px 20px; background: #F5F5F5;">
-          <div style="background: white; border-radius: 16px; padding: 40px; max-width: 400px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-            <h2 style="color: #15804C; font-size: 24px;">🌱 Paiement réussi !</h2>
-            <p style="color: #555; font-size: 16px;">Ton plan Premium est activé.</p>
-            <p style="color: #888; font-size: 14px;">Retourne sur l'app Healis pour profiter de toutes les fonctionnalités.</p>
-          </div>
+        <body style="font-family: Arial; text-align: center; padding: 60px 20px; background: #F5F5F5;">
+            <div style="background: white; border-radius: 16px; padding: 40px; max-width: 400px; margin: 0 auto;">
+            <h2 style="color: #15804C;">🌱 Paiement réussi !</h2>
+            <p style="color: #555;">Ton plan Premium est activé.</p>
+            <p style="color: #888; font-size: 14px;">Cette fenêtre se fermera automatiquement...</p>
+            </div>
         </body>
-      </html>
+        </html>
     `);
   } catch (error) {
     res.status(500).send('Erreur lors de la validation du paiement');
