@@ -220,7 +220,7 @@ export default function Profil() {
                 }
               }}
             >
-              <Text style={styles.planOptionTitle}>PREMIUM ✨</Text>
+              <Text style={styles.planOptionTitle}>PREMIUM </Text>
               <Text style={styles.planOptionDesc}>Passer au plan Premium avec accompagnement professionnel</Text>
             </TouchableOpacity>
 
