@@ -89,7 +89,7 @@ router.post('/reset-password', async (req, res) => {
       data: { password: hashedPassword, resetToken: null, resetTokenExpiry: null },
     });
 
-    res.json({ message: 'Mot de passe réinitialisé avec succès' });
+    res.json({ message: 'Mot de passe réinitialisé avec succes' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
