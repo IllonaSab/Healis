@@ -39,7 +39,7 @@ app.use('/meal-logs', authMiddleware, mealLogsRouter);
 app.use('/emotion-logs', authMiddleware, emotionLogsRouter);
 app.use('/tracker-logs', authMiddleware, waterLogsRouter);
 app.use('/phrases', phrasesRouter);
-app.use('/payment', authMiddleware, paymentRouter);
+app.use('/payment', paymentRouter);
 
 
 const PORT = process.env.PORT || 3000;
