@@ -15,7 +15,7 @@ import { colors, spacing } from '../../src/theme/colors';
 import { common } from '../../src/theme/commonStyles';
 import Button from '../../src/components/Button';
 import Input from '../../src/components/Input';
-import { api } from '../../src/services/api';
+import { api, saveUser } from '../../src/services/api';
 
 export default function Profil() {
   const { user, logout, setUser } = useAuth();
@@ -62,8 +62,10 @@ export default function Profil() {
 
   const handleChangePlan = async (plan) => {
     try {
-      const data = await api.patch('/auth/plan', { plan });
-      setUser({ ...user, plan });
+      await api.patch('/auth/plan', { plan });
+      const updatedUser = { ...user, plan };
+      setUser(updatedUser);
+      await saveUser(updatedUser);
       Alert.alert('Succès', `Plan mis à jour : ${plan}`);
       setShowPlanModal(false);
     } catch (error) {
@@ -77,7 +79,6 @@ export default function Profil() {
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
-        {/* Avatar */}
         <View style={styles.avatarSection}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>
@@ -91,7 +92,6 @@ export default function Profil() {
           </View>
         </View>
 
-        {/* Infos compte */}
         <View style={common.card}>
           <Text style={styles.sectionTitle}>Mon compte</Text>
 
@@ -133,10 +133,9 @@ export default function Profil() {
           </TouchableOpacity>
         </View>
 
-        {/* Ressources */}
         <View style={common.card}>
           <Text style={styles.sectionTitle}>Ressources</Text>
-          <Text style={styles.resourceText}>Ligne d écoute spécialisée TCA</Text>
+          <Text style={styles.resourceText}>{"Ligne d'écoute spécialisée TCA"}</Text>
           <Text style={styles.resourceValue}>Anorexie Boulimie Info Soins</Text>
           <Text style={styles.resourcePhone}>09 69 325 900</Text>
           <Text style={styles.resourceHours}>Lun-Ven 9h-17h</Text>
@@ -157,7 +156,6 @@ export default function Profil() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Modifier le mot de passe</Text>
-
             <Input
               value={currentPassword}
               onChangeText={setCurrentPassword}
@@ -176,7 +174,6 @@ export default function Profil() {
               placeholder="Confirmer le mot de passe"
               secureTextEntry
             />
-
             <Button
               label={isSubmitting ? '...' : 'Enregistrer'}
               onPress={handleChangePassword}
@@ -212,17 +209,19 @@ export default function Profil() {
               onPress={async () => {
                 try {
                   const data = await api.post('/payment/create-checkout', {});
-                  // Ouvrir l'URL Stripe dans le navigateur
-                  import('expo-web-browser').then(({ openBrowserAsync }) => {
-                    openBrowserAsync(data.url);
-                  });
+                  const { openBrowserAsync } = await import('expo-web-browser');
+                  await openBrowserAsync(data.url);
+                  const updatedUser = await api.get('/auth/me');
+                  setUser(updatedUser);
+                  await saveUser(updatedUser);
+                  setShowPlanModal(false);
                 } catch (error) {
                   Alert.alert('Erreur', error.message);
                 }
               }}
             >
-              <Text style={styles.planOptionTitle}>PREMIUM</Text>
-              <Text style={styles.planOptionDesc}>Passer au plan Premium</Text>
+              <Text style={styles.planOptionTitle}>PREMIUM ✨</Text>
+              <Text style={styles.planOptionDesc}>Passer au plan Premium avec accompagnement professionnel</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
