@@ -183,8 +183,7 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
   },
   forgotText: {
-    textAlign: 'right',
-    justifyContent: 'center',
+    textAlign: 'center',
   color: colors.textSecondary,
   fontSize: 13,
 },
