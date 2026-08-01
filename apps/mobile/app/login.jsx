@@ -17,7 +17,7 @@ import { colors, spacing } from '../src/theme/colors';
 import { common } from '../src/theme/commonStyles';
 import Input from '../src/components/Input';
 import Button from '../src/components/Button';
-import { useGoogleAuth } from '../src/hooks/userGoogleAuth';
+import { useGoogleAuth } from '../src/hooks/useGoogleAuth';
 import { api, saveToken } from '../src/services/api';
 
 const GOOGLE_ICON = require('../assets/social/google.png');

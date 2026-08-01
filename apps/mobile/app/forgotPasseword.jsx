@@ -26,22 +26,11 @@ export default function ForgotPassword() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSendCode = async () => {
-    if (!email) {
-      Alert.alert('Champ manquant', 'Entre ton adresse email.');
-      return;
-    }
-    setIsSubmitting(true);
-    try {
-        await api.post('/auth/forgot-password', { email });
-        console.log('Email envoyé');
-      setStep(2);
-    } catch (error) {
-        console.error('Erreur:', error.message);
-      Alert.alert('Erreur', error.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  Alert.alert(
+    'Fonctionnalité en cours',
+    'La réinitialisation par email sera disponible en production avec un service email dédié (Resend).'
+  );
+};
 
   const handleResetPassword = async () => {
     if (!code || !newPassword || !confirmPassword) {
