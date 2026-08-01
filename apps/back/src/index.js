@@ -12,6 +12,7 @@ const mealLogsRouter = require('./routes/mealLogs.routes.js');
 const waterLogsRouter = require('./routes/waterLogs.routes.js');
 const phrasesRouter = require('./routes/phrases.routes.js');
 const forgotPasswordRouter = require('./routes/forgotPassword.routes.js');
+const paymentRouter = require('./routes/payment.routes.js');
 
 
 const app = express();
@@ -38,6 +39,7 @@ app.use('/meal-logs', authMiddleware, mealLogsRouter);
 app.use('/emotion-logs', authMiddleware, emotionLogsRouter);
 app.use('/tracker-logs', authMiddleware, waterLogsRouter);
 app.use('/phrases', phrasesRouter);
+app.use('/payment', authMiddleware, paymentRouter);
 
 
 const PORT = process.env.PORT || 3000;

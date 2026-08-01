@@ -209,10 +209,20 @@ export default function Profil() {
 
             <TouchableOpacity
               style={[styles.planOption, user?.plan === 'PREMIUM' && styles.planOptionSelected]}
-              onPress={() => handleChangePlan('PREMIUM')}
+              onPress={async () => {
+                try {
+                  const data = await api.post('/payment/create-checkout', {});
+                  // Ouvrir l'URL Stripe dans le navigateur
+                  import('expo-web-browser').then(({ openBrowserAsync }) => {
+                    openBrowserAsync(data.url);
+                  });
+                } catch (error) {
+                  Alert.alert('Erreur', error.message);
+                }
+              }}
             >
-              <Text style={styles.planOptionTitle}>PREMIUM ✨</Text>
-              <Text style={styles.planOptionDesc}>Toutes les fonctionnalités + suivi nutritionnel avec professionnel de santé</Text>
+              <Text style={styles.planOptionTitle}>PREMIUM</Text>
+              <Text style={styles.planOptionDesc}>Passer au plan Premium</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
