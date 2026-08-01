@@ -44,7 +44,7 @@ app.use('/payment', paymentRouter);
 
 const PORT = process.env.PORT || 3000;
 
-// Ne lance le serveur que si le fichier est exécuté directement
+// Ne lance le serveur que si le fichier est exécuté directement.
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
     console.log(`Serveur lancé sur http://localhost:${PORT}`);
