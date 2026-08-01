@@ -27,7 +27,7 @@ export default function Chat() {
       id: '0',
       role: 'assistant',
       content:
-        'Bonjour 🌱 Je suis toi, dans quelques années. Une version apaisée, qui a trouvé son chemin. Je suis là pour t\'écouter, sans jugement. Comment tu te sens aujourd\'hui ?',
+        'Bonjour Je suis toi, dans quelques années. Une version apaisée, qui a trouvé son chemin. Je suis là pour t\'écouter, sans jugement. Comment tu te sens aujourd\'hui ?',
     },
   ]);
   // Message d’accueil du jumeau émotionnel
@@ -80,7 +80,7 @@ export default function Chat() {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
           content:
-            "Je suis là, mais quelque chose m'empêche de te répondre en ce moment. Réessaie dans un instant 🌿",
+            "Je suis là, mais quelque chose m'empêche de te répondre en ce moment. Réessaie dans un instant ",
         },
       ]);
       // Message fallback en cas d’erreur API

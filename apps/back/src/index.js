@@ -11,6 +11,8 @@ const emotionLogsRouter = require('./routes/emotionLogs.routes.js');
 const mealLogsRouter = require('./routes/mealLogs.routes.js');
 const waterLogsRouter = require('./routes/waterLogs.routes.js');
 const phrasesRouter = require('./routes/phrases.routes.js');
+const forgotPasswordRouter = require('./routes/forgotPassword.routes.js');
+
 
 const app = express();
 app.use(cors());
@@ -30,11 +32,13 @@ app.get('/health/db', async (req, res) => {
 });
 
 app.use('/auth', authRouter);
+app.use('/auth', forgotPasswordRouter);
 app.use('/chat', authMiddleware, chatRouter);
 app.use('/meal-logs', authMiddleware, mealLogsRouter);
 app.use('/emotion-logs', authMiddleware, emotionLogsRouter);
 app.use('/tracker-logs', authMiddleware, waterLogsRouter);
 app.use('/phrases', phrasesRouter);
+
 
 const PORT = process.env.PORT || 3000;
 

@@ -3,7 +3,7 @@ import { View, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '../../src/theme/colors';
 
-const LOGO = require('../../assets/tabs/header-logo.png');
+
 
 const TABS = [
   { name: 'index', icon: require('../../assets/tabs/home.png'), label: 'Accueil' },

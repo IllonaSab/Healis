@@ -126,7 +126,12 @@ return (
               disabled={isSubmitting}
               size="full"
               // Bouton de connexion
-            />
+          />
+          
+          <TouchableOpacity onPress={() => router.push('/forgotPasseword')}>
+  <Text style={styles.forgotText}>{'Mot de passe oublié ?'}</Text>
+</TouchableOpacity>
+           {/* lien mot de passe oublié */}
 
             <TouchableOpacity onPress={() => router.replace('/register')}>
               <Text style={common.switchText}>
@@ -177,4 +182,10 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xl,
     gap: spacing.lg,
   },
+  forgotText: {
+    textAlign: 'right',
+    justifyContent: 'center',
+  color: colors.textSecondary,
+  fontSize: 13,
+},
 });
