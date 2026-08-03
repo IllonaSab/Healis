@@ -59,7 +59,7 @@ export default function PhraseCard() {
 const styles = StyleSheet.create({
   wrapper: {
     position: 'absolute',
-    bottom: 120,
+    bottom: 106,
     right: 16,
     alignItems: 'flex-end',
   },
