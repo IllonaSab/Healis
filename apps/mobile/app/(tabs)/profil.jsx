@@ -17,7 +17,6 @@ import Button from '../../src/components/Button';
 import Input from '../../src/components/Input';
 import { api, saveUser } from '../../src/services/api';
 
-
 export default function Profil() {
   const { user, logout, setUser } = useAuth();
 
@@ -31,6 +30,16 @@ export default function Profil() {
   const handleLogout = async () => {
     await logout();
     router.replace('/login');
+  };
+
+  const handleRefreshUser = async () => {
+    try {
+      const updatedUser = await api.get('/auth/me');
+      setUser(updatedUser);
+      await saveUser(updatedUser);
+    } catch (error) {
+      Alert.alert('Erreur', error.message);
+    }
   };
 
   const handleChangePassword = async () => {
@@ -120,6 +129,9 @@ export default function Profil() {
               <Text style={styles.infoValue}>{user?.plan || 'FREE'}</Text>
               <TouchableOpacity onPress={() => setShowPlanModal(true)}>
                 <Text style={styles.editLink}>Modifier</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleRefreshUser}>
+                <Text style={styles.editLink}>↻</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -212,16 +224,14 @@ export default function Profil() {
                   const data = await api.post('/payment/create-checkout', {});
                   const { openBrowserAsync } = await import('expo-web-browser');
                   await openBrowserAsync(data.url);
-                  const updatedUser = await api.get('/auth/me');
-                  setUser(updatedUser);
-                  await saveUser(updatedUser);
+                  await handleRefreshUser();
                   setShowPlanModal(false);
                 } catch (error) {
                   Alert.alert('Erreur', error.message);
                 }
               }}
             >
-              <Text style={styles.planOptionTitle}>PREMIUM </Text>
+              <Text style={styles.planOptionTitle}>PREMIUM ✨</Text>
               <Text style={styles.planOptionDesc}>Passer au plan Premium avec accompagnement professionnel</Text>
             </TouchableOpacity>
 
