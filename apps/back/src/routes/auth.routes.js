@@ -183,4 +183,20 @@ router.patch('/plan', authMiddleware, async (req, res) => {
   }
 });
 
+// GET /auth/me
+router.get('/me', authMiddleware, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.userId } });
+    res.json({
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      plan: user.plan,
+      objectif: user.objectif,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;
