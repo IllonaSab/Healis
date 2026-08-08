@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, ScrollView, ActivityIndicator} from 'react-native';
+import { StyleSheet, ScrollView, ActivityIndicator, View, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 
@@ -8,7 +8,6 @@ import EmojiCard from '../../src/components/EmojiCard';
 import RepasCard from '../../src/components/RepasCard';
 import TrackerEau from '../../src/components/TrackerEau';
 import PhraseCard from '../../src/components/PhraseCard';
-
 
 import { colors, spacing } from '../../src/theme/colors';
 import { api } from '../../src/services/api';
@@ -20,61 +19,59 @@ const MEAL_TYPES = [
   { id: 'EN_CAS', label: 'En-cas' },
   { id: 'DINER', label: 'Dîner' },
 ];
-// Types de repas utilisés pour afficher et organiser les cartes
-
 
 function toDateStr(date) {
   if (typeof date === 'string') return date;
-  // Si déjà une string --> ne rien transformer
-
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
-  // Convertit un objet Date en YYYY-MM-DD
 }
 
-
 export default function Dashboard() {
-  const { user, isLoading: authLoading, logout } = useAuth();
-  // Contexte d’auth --> accès à l’utilisateur + logout
+  const { user, isLoading: authLoading } = useAuth();
 
   const todayStr = (() => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   })();
-  // Génère la date du jour au format YYYY-MM-DD
 
   const [selectedDate, setSelectedDate] = useState(todayStr);
   const [selectedMood, setSelectedMood] = useState(null);
   const [mealLogs, setMealLogs] = useState([]);
   const [isLoadingMeals, setIsLoadingMeals] = useState(true);
-  // États principaux du tableau de bord
-
+  const [streak, setStreak] = useState(0);
+  const [showStreak, setShowStreak] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
       router.replace('/login');
-      // Redirection si l’utilisateur n’est pas connecté
     }
   }, [authLoading, user]);
 
-
+  useEffect(() => {
+    if (user) {
+      fetchDataForDate(selectedDate);
+      api.get('/stats/streak').then(data => {
+        setStreak(data.streak);
+        if (data.streak > 0 && data.streak % 7 === 0) {
+          setShowStreak(true);
+          setTimeout(() => setShowStreak(false), 5000);
+        }
+      }).catch(() => {});
+    }
+  }, [user]);
 
   const fetchDataForDate = async (date) => {
     try {
       setIsLoadingMeals(true);
       const dateStr = toDateStr(date);
-
       const [meals, emotions] = await Promise.all([
         api.get(`/meal-logs?date=${dateStr}`),
         api.get(`/emotion-logs?date=${dateStr}`),
       ]);
-      // Charge repas + émotions en parallèle
-
       setMealLogs(meals);
       setSelectedMood(emotions.length > 0 ? emotions[0].emotion : null);
-      // Sélectionne la première émotion du jour si existante
     } catch (error) {
       console.error('Erreur chargement données:', error.message);
     } finally {
@@ -82,114 +79,63 @@ export default function Dashboard() {
     }
   };
 
-
-  useEffect(() => {
-    if (user) fetchDataForDate(selectedDate);
-    // Charge les données du jour dès que l’utilisateur est disponible
-  }, [user]);
-
-
   const handleSelectDay = (date) => {
     setSelectedDate(date);
     setSelectedMood(null);
     setMealLogs([]);
     fetchDataForDate(date);
-    // Réinitialise l’état et recharge les données pour la nouvelle date
   };
-
 
   const handleSelectMood = async (moodId) => {
     setSelectedMood(moodId);
-    // Met à jour l’émotion sélectionnée localement
-
     try {
       await api.post('/emotion-logs', {
         emotion: moodId,
         intensity: 5,
         date: toDateStr(selectedDate),
       });
-      // Sauvegarde l’émotion du jour
     } catch (error) {
       console.error('Erreur sauvegarde émotion:', error.message);
     }
   };
 
-
-  const getMealForType = (mealType) =>
-    mealLogs.find((m) => m.mealType === mealType);
-  // Récupère le repas correspondant à un type donné
-
+  const getMealForType = (mealType) => mealLogs.find((m) => m.mealType === mealType);
 
   const handleUpdateMeal = async (mealType, newTitle, newDescription) => {
     const existing = getMealForType(mealType);
-
     if (existing) {
-      const updated = await api.patch(`/meal-logs/${existing.id}`, {
-        title: newTitle,
-        description: newDescription,
-      });
-      // Mise à jour d’un repas existant
-
-      setMealLogs((prev) =>
-        prev.map((m) => (m.id === updated.id ? updated : m))
-      );
+      const updated = await api.patch(`/meal-logs/${existing.id}`, { title: newTitle, description: newDescription });
+      setMealLogs((prev) => prev.map((m) => (m.id === updated.id ? updated : m)));
     } else {
-      const created = await api.post('/meal-logs', {
-        mealType,
-        title: newTitle,
-        description: newDescription,
-        eaten: false,
-        date: toDateStr(selectedDate),
-      });
-      // Création d’un nouveau repas
-
+      const created = await api.post('/meal-logs', { mealType, title: newTitle, description: newDescription, eaten: false, date: toDateStr(selectedDate) });
       setMealLogs((prev) => [...prev, created]);
     }
   };
-
 
   const handleMarkEaten = async (mealType) => {
     const existing = getMealForType(mealType);
-
     if (existing) {
-      const updated = await api.patch(`/meal-logs/${existing.id}`, {
-        eaten: !existing.eaten,
-      });
-      // Toggle du statut "mangé"
-
-      setMealLogs((prev) =>
-        prev.map((m) => (m.id === updated.id ? updated : m))
-      );
+      const updated = await api.patch(`/meal-logs/${existing.id}`, { eaten: !existing.eaten });
+      setMealLogs((prev) => prev.map((m) => (m.id === updated.id ? updated : m)));
     } else {
-      const created = await api.post('/meal-logs', {
-        mealType,
-        title: 'Repas non détaillé',
-        eaten: true,
-        date: toDateStr(selectedDate),
-      });
-      // Création rapide d’un repas marqué comme mangé
-
+      const created = await api.post('/meal-logs', { mealType, title: 'Repas non détaillé', eaten: true, date: toDateStr(selectedDate) });
       setMealLogs((prev) => [...prev, created]);
     }
   };
 
-
-  const handleLogout = async () => {
-    await logout();
-    router.replace('/login');
-    // Déconnexion + redirection
+  const getStreakMessage = () => {
+    if (streak >= 21) return '🌟 Incroyable ! 3 semaines de suivi. Tu avances vraiment bien.';
+    if (streak >= 14) return '✨ 2 semaines consécutives ! Tu prends soin de toi chaque jour.';
+    return '🌱 Bravo ! 7 jours de suivi consécutifs. Continue dans cette lancée !';
   };
-
 
   if (authLoading) {
     return (
       <SafeAreaView style={[styles.safeArea, styles.centered]}>
         <ActivityIndicator size="large" color={colors.accent} />
-        {/* Loader pendant la vérification de l’auth */}
       </SafeAreaView>
     );
   }
-
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -199,18 +145,18 @@ export default function Dashboard() {
         showsVerticalScrollIndicator={false}
       >
         <Calendrier onSelectDay={handleSelectDay} />
-        {/* Sélection de la date */}
+
+        {showStreak && (
+          <View style={styles.streakCard}>
+            <Text style={styles.streakText}>{getStreakMessage()}</Text>
+          </View>
+        )}
 
         {isLoadingMeals ? (
           <ActivityIndicator size="small" color={colors.accent} />
-          // Loader pendant le chargement des repas
         ) : (
           <>
-            <EmojiCard
-              selectedMood={selectedMood}
-              onSelectMood={handleSelectMood}
-            />
-            {/* Sélection de l’émotion du jour */}
+            <EmojiCard selectedMood={selectedMood} onSelectMood={handleSelectMood} />
 
             {MEAL_TYPES.map((meal) => {
               const log = getMealForType(meal.id);
@@ -227,20 +173,16 @@ export default function Dashboard() {
                 />
               );
             })}
-            {/* Cartes des repas du jour */}
 
             <TrackerEau selectedDate={toDateStr(selectedDate)} />
-            {/* Suivi de l’eau */}
           </>
         )}
       </ScrollView>
 
       <PhraseCard />
-      {/* Phrase du jour */}
     </SafeAreaView>
   );
 }
-
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -257,16 +199,24 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
-    paddingBottom: 145,
+    paddingBottom: 180,
     gap: spacing.lg,
     alignItems: 'center',
   },
-  logoutButton: {
-    paddingVertical: 12,
-    alignItems: 'center',
+  streakCard: {
+    width: '100%',
+    maxWidth: 320,
+    backgroundColor: '#E8F5EC',
+    borderRadius: 16,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.accent,
   },
-  logoutText: {
-    color: 'red',
+  streakText: {
     fontSize: 14,
+    color: colors.accent,
+    textAlign: 'center',
+    fontWeight: '600',
+    lineHeight: 22,
   },
 });

@@ -41,7 +41,7 @@ app.use('/emotion-logs', authMiddleware, emotionLogsRouter);
 app.use('/tracker-logs', authMiddleware, waterLogsRouter);
 app.use('/phrases', phrasesRouter);
 app.use('/payment', paymentRouter);
-app.use('/stats', statsRouter);
+app.use('/stats', authMiddleware, statsRouter);
 
 const PORT = process.env.PORT || 3000;
 
