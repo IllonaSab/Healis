@@ -13,6 +13,7 @@ const waterLogsRouter = require('./routes/waterLogs.routes.js');
 const phrasesRouter = require('./routes/phrases.routes.js');
 const forgotPasswordRouter = require('./routes/forgotPassword.routes.js');
 const paymentRouter = require('./routes/payment.routes.js');
+const statsRouter = require('./routes/stats.routes.js');
 
 
 const app = express();
@@ -40,7 +41,7 @@ app.use('/emotion-logs', authMiddleware, emotionLogsRouter);
 app.use('/tracker-logs', authMiddleware, waterLogsRouter);
 app.use('/phrases', phrasesRouter);
 app.use('/payment', paymentRouter);
-
+app.use('/stats', statsRouter);
 
 const PORT = process.env.PORT || 3000;
 
