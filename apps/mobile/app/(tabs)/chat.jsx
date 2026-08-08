@@ -5,6 +5,8 @@ import {
   Image,
   StyleSheet,
   ScrollView,
+  TextInput,
+  TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
@@ -13,46 +15,33 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { colors, spacing } from '../../src/theme/colors';
 import { api } from '../../src/services/api';
 
-import Button from '../../src/components/Button';
-import Input from '../../src/components/Input';
-
 const LOGO = require('../../assets/tabs/header-logo.png');
 
 export default function Chat() {
   const insets = useSafeAreaInsets();
-  // Ajuste l’UI selon les zones sécurisées (iPhone, Android)
 
   const [messages, setMessages] = useState([
     {
       id: '0',
       role: 'assistant',
-      content:
-        'Bonjour Je suis toi, dans quelques années. Une version apaisée, qui a trouvé son chemin. Je suis là pour t\'écouter, sans jugement. Comment tu te sens aujourd\'hui ?',
+      content: "Bonjour 🌱 Je suis toi, dans quelques années. Une version apaisée, qui a trouvé son chemin. Je suis là pour t'écouter, sans jugement. Comment tu te sens aujourd'hui ?",
     },
   ]);
-  // Message d’accueil du jumeau émotionnel
 
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef(null);
-  // Permet de scroller automatiquement vers le bas
-
 
   useEffect(() => {
     scrollRef.current?.scrollToEnd({ animated: true });
-    // Scroll automatique à chaque nouveau message
   }, [messages]);
-
 
   const sendMessage = async () => {
     const text = input.trim();
     if (!text || isLoading) return;
-    // Empêche l’envoi de messages vides ou multiples simultanés
 
     const userMessage = { id: Date.now().toString(), role: 'user', content: text };
     setMessages((prev) => [...prev, userMessage]);
-    // Ajoute le message utilisateur dans la conversation
-
     setInput('');
     setIsLoading(true);
 
@@ -60,56 +49,48 @@ export default function Chat() {
       const response = await api.post('/chat', {
         message: text,
         history: messages.map((m) => ({ role: m.role, content: m.content })),
-        // Envoie l’historique complet au backend pour Mistral
       });
-
-      const assistantMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: response.reply,
-      };
-      // Réponse du jumeau émotionnel
-
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error) {
-      console.error('Erreur chat:', error.message);
 
       setMessages((prev) => [
         ...prev,
         {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content:
-            "Je suis là, mais quelque chose m'empêche de te répondre en ce moment. Réessaie dans un instant ",
+          content: response.reply,
         },
       ]);
-      // Message fallback en cas d’erreur API
+    } catch (error) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: "Je suis là, mais quelque chose m'empêche de te répondre en ce moment. Réessaie dans un instant 🌿",
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
   };
 
-
   return (
     <SafeAreaView style={styles.safeArea} edges={['left', 'right', 'bottom']}>
       <View style={[styles.header, { paddingTop: insets.top, height: 64 + insets.top }]}>
         <Image source={LOGO} style={styles.logo} resizeMode="contain" />
-        {/* Header avec logo */}
       </View>
 
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={90}
-        // Remonte l’input sur iOS quand le clavier apparaît
+        keyboardVerticalOffset={60}
       >
         <ScrollView
           ref={scrollRef}
           style={styles.messagesContainer}
           contentContainerStyle={styles.messagesContent}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
-          {/* Affichage des bulles de messages */}
           {messages.map((msg) => (
             <View
               key={msg.id}
@@ -118,25 +99,14 @@ export default function Chat() {
                 msg.role === 'user' ? styles.bubbleWrapperUser : styles.bubbleWrapperAssistant,
               ]}
             >
-              <View
-                style={[
-                  styles.bubble,
-                  msg.role === 'user' ? styles.bubbleUser : styles.bubbleAssistant,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.bubbleText,
-                    msg.role === 'user' ? styles.bubbleTextUser : styles.bubbleTextAssistant,
-                  ]}
-                >
+              <View style={[styles.bubble, msg.role === 'user' ? styles.bubbleUser : styles.bubbleAssistant]}>
+                <Text style={[styles.bubbleText, msg.role === 'user' ? styles.bubbleTextUser : styles.bubbleTextAssistant]}>
                   {msg.content}
                 </Text>
               </View>
             </View>
           ))}
 
-          {/* Animation de chargement pendant la réponse */}
           {isLoading && (
             <View style={[styles.bubbleWrapper, styles.bubbleWrapperAssistant]}>
               <View style={[styles.bubble, styles.bubbleAssistant]}>
@@ -146,30 +116,29 @@ export default function Chat() {
           )}
         </ScrollView>
 
-        {/* Input + bouton d’envoi */}
         <View style={styles.inputRow}>
-          <Input
+          <TextInput
+            style={styles.input}
             value={input}
             onChangeText={setInput}
             placeholder="Écris ce que tu ressens..."
+            placeholderTextColor={colors.gray}
+            multiline
             maxLength={500}
-            style={styles.chatInput}
           />
-
-          <Button
-            label="Envoyer"
+          <TouchableOpacity
+            style={[styles.sendButton, (!input.trim() || isLoading) && styles.sendButtonDisabled]}
             onPress={sendMessage}
             disabled={!input.trim() || isLoading}
-            variant="primary"
-            size="sm"
-            // Désactivé si champ vide ou en cours de réponse
-          />
+            activeOpacity={0.8}
+          >
+            <Text style={styles.sendIcon}>↑</Text>
+          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
-
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -197,7 +166,7 @@ const styles = StyleSheet.create({
   },
   messagesContent: {
     padding: spacing.lg,
-    paddingBottom: spacing.xl,
+    paddingBottom: spacing.lg,
     gap: spacing.sm,
   },
   bubbleWrapper: {
@@ -235,26 +204,48 @@ const styles = StyleSheet.create({
   },
   bubbleTextUser: {
     color: colors.white,
-    
   },
   bubbleTextAssistant: {
     color: colors.textPrimary,
-    backgroundColor: colors.white,
   },
   inputRow: {
-  flexDirection: 'row',
+    flexDirection: 'row',
     alignItems: 'flex-end',
-  backgroundColor: colors.white,  // ← flex-end pour que le bouton reste en bas
-  gap: spacing.sm,
-  paddingHorizontal: spacing.lg,
-  paddingVertical: spacing.md,
-  paddingBottom: 90,
+    gap: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    paddingBottom: 100,
+    backgroundColor: colors.white,
+    borderTopWidth: 1,
+    borderTopColor: '#F0F0F0',
   },
-chatInput: {
-  flex: 1,
-  minHeight: 33,
-  maxHeight: 120,
-  paddingTop: 8,
-  paddingBottom: 8,
-},
+  input: {
+    flex: 1,
+    minHeight: 40,
+    maxHeight: 100,
+    backgroundColor: colors.background,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    fontSize: 14,
+    color: colors.textPrimary,
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
+  },
+  sendButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sendButtonDisabled: {
+    backgroundColor: '#A0C4B4',
+  },
+  sendIcon: {
+    color: colors.white,
+    fontSize: 18,
+    fontWeight: '700',
+  },
 });
