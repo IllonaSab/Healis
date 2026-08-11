@@ -5,15 +5,16 @@ import {
   Image,
   StyleSheet,
   ScrollView,
-  TextInput,
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
 } from 'react-native';
+
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing } from '../../src/theme/colors';
 import { api } from '../../src/services/api';
+import Input from '../../src/components/Input';
 
 const LOGO = require('../../assets/tabs/header-logo.png');
 
@@ -117,14 +118,13 @@ export default function Chat() {
         </ScrollView>
 
         <View style={styles.inputRow}>
-          <TextInput
-            style={styles.input}
+          <Input
             value={input}
             onChangeText={setInput}
             placeholder="Écris ce que tu ressens..."
-            placeholderTextColor={colors.gray}
-            multiline
             maxLength={500}
+            multiline
+            style={styles.chatInput}
           />
           <TouchableOpacity
             style={[styles.sendButton, (!input.trim() || isLoading) && styles.sendButtonDisabled]}
@@ -215,7 +215,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     paddingBottom: 100,
-    backgroundColor: colors.white,
     borderTopWidth: 1,
     borderTopColor: '#F0F0F0',
   },
@@ -232,6 +231,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E5E5E5',
   },
+  chatInput: {
+  flex: 1,
+  minHeight: 40,
+  maxHeight: 100,
+},
+  
   sendButton: {
     width: 40,
     height: 40,
