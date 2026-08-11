@@ -6,6 +6,16 @@ const { authMiddleware } = require('../middlewares/auth.middleware.js');
 
 const router = express.Router();
 
+function logError(route, error, userId = 'anonymous') {
+  console.error(JSON.stringify({
+    timestamp: new Date().toISOString(),
+    type: 'ERROR',
+    route,
+    userId,
+    message: error.message,
+  }));
+}
+
 // POST /auth/register
 router.post('/register', async (req, res) => {
   try {
@@ -41,6 +51,7 @@ router.post('/register', async (req, res) => {
       },
     });
   } catch (error) {
+    logError('POST /auth/register', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -79,6 +90,7 @@ router.post('/login', async (req, res) => {
       },
     });
   } catch (error) {
+    logError('POST /auth/login', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -131,6 +143,7 @@ router.post('/google', async (req, res) => {
       },
     });
   } catch (error) {
+    logError('POST /auth/google', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -159,6 +172,7 @@ router.patch('/password', authMiddleware, async (req, res) => {
 
     res.json({ message: 'Mot de passe modifié avec succès' });
   } catch (error) {
+    logError('PATCH /auth/password', error, req.userId);
     res.status(500).json({ message: error.message });
   }
 });
@@ -179,6 +193,7 @@ router.patch('/plan', authMiddleware, async (req, res) => {
 
     res.json({ message: 'Plan mis à jour', plan: user.plan });
   } catch (error) {
+    logError('PATCH /auth/plan', error, req.userId);
     res.status(500).json({ message: error.message });
   }
 });
@@ -195,6 +210,7 @@ router.get('/me', authMiddleware, async (req, res) => {
       objectif: user.objectif,
     });
   } catch (error) {
+    logError('GET /auth/me', error, req.userId);
     res.status(500).json({ message: error.message });
   }
 });

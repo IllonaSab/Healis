@@ -7,6 +7,16 @@ const { prisma } = require('../db.js');
 const router = express.Router();
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+function logError(route, error, userId = 'anonymous') {
+  console.error(JSON.stringify({
+    timestamp: new Date().toISOString(),
+    type: 'ERROR',
+    route,
+    userId,
+    message: error.message,
+  }));
+}
+
 // POST /auth/forgot-password
 router.post('/forgot-password', async (req, res) => {
   try {
@@ -53,7 +63,7 @@ router.post('/forgot-password', async (req, res) => {
 
     res.json({ message: 'Si cet email existe, un code a été envoyé.' });
   } catch (error) {
-    console.error('Erreur forgot-password:', error.message);
+    logError('POST /auth/forgot-password', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -89,8 +99,9 @@ router.post('/reset-password', async (req, res) => {
       data: { password: hashedPassword, resetToken: null, resetTokenExpiry: null },
     });
 
-    res.json({ message: 'Mot de passe réinitialisé avec succes' });
+    res.json({ message: 'Mot de passe réinitialisé avec succès' });
   } catch (error) {
+    logError('POST /auth/reset-password', error);
     res.status(500).json({ message: error.message });
   }
 });

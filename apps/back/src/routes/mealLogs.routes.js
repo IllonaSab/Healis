@@ -1,5 +1,5 @@
-const express = require('express');
-const { prisma } = require('../db.js');
+import express from 'express';
+import { prisma } from '../db.js';
 
 const router = express.Router();
 
@@ -7,7 +7,7 @@ const router = express.Router();
 // Récupère les repas du jour pour l'utilisateur connecté
 router.get('/', async (req, res) => {
   try {
-    const userId = req.userId; // injecté par le middleware d'auth
+    const userId = req.userId; // injecté par le middleware d'auth (à brancher)
     const { date } = req.query;
 
     const dateStr = date || new Date().toISOString().split('T')[0];
@@ -89,4 +89,4 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

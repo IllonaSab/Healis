@@ -20,6 +20,16 @@ Tu ne remplaces pas ce soutien professionnel.
 Tes réponses sont courtes (2-3 phrases), douces, chaleureuses, sans jugement.
 Tu valides toujours l'émotion avant toute autre chose.`;
 
+function logError(route, error, userId = 'anonymous') {
+  console.error(JSON.stringify({
+    timestamp: new Date().toISOString(),
+    type: 'ERROR',
+    route,
+    userId,
+    message: error.message,
+  }));
+}
+
 // POST /chat
 router.post('/', async (req, res) => {
   try {
@@ -30,7 +40,6 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ message: 'message est requis' });
     }
 
-    // Construire l'historique pour Mistral
     const mistralMessages = [
       ...history.map((m) => ({ role: m.role, content: m.content })),
       { role: 'user', content: message },
@@ -45,7 +54,6 @@ router.post('/', async (req, res) => {
 
     const reply = response.choices[0].message.content;
 
-    // Sauvegarder la conversation en base si conversationId fourni
     if (conversationId) {
       await prisma.message.createMany({
         data: [
@@ -57,25 +65,25 @@ router.post('/', async (req, res) => {
 
     res.json({ reply });
   } catch (error) {
-    console.error('Erreur Mistral:', error.message);
+    logError('POST /chat', error, req.userId);
     res.status(500).json({ message: error.message });
   }
 });
 
-// POST /chat/conversation — créer une nouvelle conversation
+// POST /chat/conversation
 router.post('/conversation', async (req, res) => {
   try {
-    const userId = req.userId;
     const conversation = await prisma.conversation.create({
-      data: { userId },
+      data: { userId: req.userId },
     });
     res.status(201).json(conversation);
   } catch (error) {
+    logError('POST /chat/conversation', error, req.userId);
     res.status(500).json({ message: error.message });
   }
 });
 
-// GET /chat/conversation/:id — charger l'historique
+// GET /chat/conversation/:id
 router.get('/conversation/:id', async (req, res) => {
   try {
     const messages = await prisma.message.findMany({
@@ -84,6 +92,7 @@ router.get('/conversation/:id', async (req, res) => {
     });
     res.json(messages);
   } catch (error) {
+    logError('GET /chat/conversation/:id', error, req.userId);
     res.status(500).json({ message: error.message });
   }
 });

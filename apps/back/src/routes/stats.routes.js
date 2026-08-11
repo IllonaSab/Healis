@@ -3,6 +3,16 @@ const { prisma } = require('../db.js');
 
 const router = express.Router();
 
+function logError(route, error, userId = 'anonymous') {
+  console.error(JSON.stringify({
+    timestamp: new Date().toISOString(),
+    type: 'ERROR',
+    route,
+    userId,
+    message: error.message,
+  }));
+}
+
 // GET /stats/streak
 router.get('/streak', async (req, res) => {
   try {
@@ -24,6 +34,7 @@ router.get('/streak', async (req, res) => {
     const streak = counts.every(Boolean) ? 7 : counts.findIndex(c => !c);
     res.json({ streak });
   } catch (error) {
+    logError('GET /stats/streak', error, req.userId);
     res.status(500).json({ message: error.message });
   }
 });

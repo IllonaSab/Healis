@@ -3,6 +3,16 @@ const { prisma } = require('../db.js');
 
 const router = express.Router();
 
+function logError(route, error, userId = 'anonymous') {
+  console.error(JSON.stringify({
+    timestamp: new Date().toISOString(),
+    type: 'ERROR',
+    route,
+    userId,
+    message: error.message,
+  }));
+}
+
 router.get('/', async (req, res) => {
   try {
     const userId = req.userId;
@@ -13,15 +23,13 @@ router.get('/', async (req, res) => {
     const endOfDay = new Date(`${dateStr}T23:59:59.999Z`);
 
     const logs = await prisma.emotionLog.findMany({
-      where: {
-        userId,
-        date: { gte: startOfDay, lte: endOfDay },
-      },
+      where: { userId, date: { gte: startOfDay, lte: endOfDay } },
       orderBy: { date: 'desc' },
     });
 
     res.json(logs);
   } catch (error) {
+    logError('GET /emotion-logs', error, req.userId);
     res.status(500).json({ message: error.message });
   }
 });
@@ -48,6 +56,7 @@ router.post('/', async (req, res) => {
 
     res.status(201).json(log);
   } catch (error) {
+    logError('POST /emotion-logs', error, req.userId);
     res.status(500).json({ message: error.message });
   }
 });
@@ -57,6 +66,7 @@ router.delete('/:id', async (req, res) => {
     await prisma.emotionLog.delete({ where: { id: req.params.id } });
     res.status(204).send();
   } catch (error) {
+    logError('DELETE /emotion-logs/:id', error, req.userId);
     res.status(500).json({ message: error.message });
   }
 });
