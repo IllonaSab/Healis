@@ -15,10 +15,25 @@ const forgotPasswordRouter = require('./routes/forgotPassword.routes.js');
 const paymentRouter = require('./routes/payment.routes.js');
 const statsRouter = require('./routes/stats.routes.js');
 
-
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Middleware de logging structuré — C4.1.2
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    console.log(JSON.stringify({
+      timestamp: new Date().toISOString(),
+      method: req.method,
+      path: req.path,
+      status: res.statusCode,
+      duration: `${duration}ms`,
+    }));
+  });
+  next();
+});
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
@@ -45,7 +60,6 @@ app.use('/stats', authMiddleware, statsRouter);
 
 const PORT = process.env.PORT || 3000;
 
-// Ne lance le serveur que si le fichier est exécuté directement.
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
     console.log(`Serveur lancé sur http://localhost:${PORT}`);
