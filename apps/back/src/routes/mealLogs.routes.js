@@ -1,13 +1,22 @@
-import express from 'express';
-import { prisma } from '../db.js';
+const express = require('express');
+const { prisma } = require('../db.js');
 
 const router = express.Router();
 
+function logError(route, error, userId = 'anonymous') {
+  console.error(JSON.stringify({
+    timestamp: new Date().toISOString(),
+    type: 'ERROR',
+    route,
+    userId,
+    message: error.message,
+  }));
+}
+
 // GET /meal-logs?date=2026-06-30
-// Récupère les repas du jour pour l'utilisateur connecté
 router.get('/', async (req, res) => {
   try {
-    const userId = req.userId; // injecté par le middleware d'auth (à brancher)
+    const userId = req.userId;
     const { date } = req.query;
 
     const dateStr = date || new Date().toISOString().split('T')[0];
@@ -15,21 +24,18 @@ router.get('/', async (req, res) => {
     const endOfDay = new Date(`${dateStr}T23:59:59.999Z`);
 
     const mealLogs = await prisma.mealLog.findMany({
-      where: {
-        userId,
-        date: { gte: startOfDay, lte: endOfDay },
-      },
+      where: { userId, date: { gte: startOfDay, lte: endOfDay } },
       orderBy: { date: 'asc' },
     });
 
     res.json(mealLogs);
   } catch (error) {
+    logError('GET /meal-logs', error, req.userId);
     res.status(500).json({ message: error.message });
   }
 });
 
 // POST /meal-logs
-// Crée un repas (suggéré via recipeId OU saisi librement par l'utilisateur)
 router.post('/', async (req, res) => {
   try {
     const userId = req.userId;
@@ -52,12 +58,12 @@ router.post('/', async (req, res) => {
 
     res.status(201).json(mealLog);
   } catch (error) {
+    logError('POST /meal-logs', error, req.userId);
     res.status(500).json({ message: error.message });
   }
 });
 
 // PATCH /meal-logs/:id
-// Met à jour un repas (titre/description modifiés par l'utilisateur, ou marqué comme mangé)
 router.patch('/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -74,6 +80,7 @@ router.patch('/:id', async (req, res) => {
 
     res.json(mealLog);
   } catch (error) {
+    logError('PATCH /meal-logs/:id', error, req.userId);
     res.status(500).json({ message: error.message });
   }
 });
@@ -81,12 +88,12 @@ router.patch('/:id', async (req, res) => {
 // DELETE /meal-logs/:id
 router.delete('/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    await prisma.mealLog.delete({ where: { id } });
+    await prisma.mealLog.delete({ where: { id: req.params.id } });
     res.status(204).send();
   } catch (error) {
+    logError('DELETE /meal-logs/:id', error, req.userId);
     res.status(500).json({ message: error.message });
   }
 });
 
-export default router;
+module.exports = router;
