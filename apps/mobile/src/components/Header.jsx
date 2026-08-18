@@ -2,12 +2,13 @@ import React from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import { colors } from '../theme/colors';
 
+// Import statique de l'image du logo depuis les assets de l'application
 const LOGO = require('../../assets/tabs/header-logo.png');
 
 export default function Header() {
   return (
     <View style={styles.container}>
-      {/* Affichage du logo dans un header simple */}
+      {/* Affiche le logo avec 'contain' pour conserver son ratio d'aspect sans déformation */}
       <Image
         source={LOGO}
         style={styles.logo}
@@ -22,18 +23,15 @@ const styles = StyleSheet.create({
     width: '90%',
     height: 100,
     backgroundColor: colors.white,
-    alignItems: 'center',
-    justifyContent: 'flex-start',
+    alignItems: 'center',        // Centre horizontalement le logo
+    justifyContent: 'flex-start', // Place le contenu vers le haut
     paddingTop: 8,
-    borderBottomWidth: 1,
+    borderBottomWidth: 1,         // Délimitation visuelle sous le bandeau
     borderBottomColor: colors.accent,
-    // Header minimaliste : fond blanc + ligne d’accent en bas
   },
 
   logo: {
     width: 285,
     height: 48,
-    // Dimensions fixes pour un rendu stable du logo
   },
 });
-

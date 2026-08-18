@@ -18,15 +18,17 @@ import { common } from '../src/theme/commonStyles';
 import Input from '../src/components/Input';
 import Button from '../src/components/Button';
 
+// Liste des intentions proposées lors de l'onboarding
 const OBJECTIFS = [
   { id: 'Reprendre confiance en soi', label: 'Reprendre confiance en soi' },
   { id: 'réconciliation avec la nourriture', label: 'Réconciliation avec la nourriture' },
   { id: 'Équilibre', label: 'Équilibre' },
 ];
-// Liste des intentions proposées à l’utilisateur
 
 export default function Register() {
   const { register } = useAuth();
+
+  // Contrôle l'étape actuelle du formulaire (1: coordonnées, 2: message d'accueil, 3: objectif)
   const [step, setStep] = useState(1);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -35,6 +37,7 @@ export default function Register() {
   const [objectif, setObjectif] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Vérifie les champs obligatoires avant d'avancer à l'étape suivante
   const handleNext = () => {
     if (step === 1 && (!firstName || !email || !password)) {
       Alert.alert('Champs manquants', 'Tous les champs sont requis.');
@@ -43,30 +46,29 @@ export default function Register() {
     setStep((prev) => prev + 1);
   };
 
-    const handleRegister = async () => {
+  // Envoie l'ensemble des données collectées au AuthContext pour créer le compte en base
+  const handleRegister = async () => {
     setIsSubmitting(true);
     try {
-        await register(email, password, firstName, objectif);
-        router.replace('/');
+      await register(email, password, firstName, objectif);
+      router.replace('/'); // Redirection vers le tableau de bord sans retour possible sur le formulaire
     } catch (error) {
-        Alert.alert('Erreur', error.message);
+      Alert.alert('Erreur', error.message);
     } finally {
-        setIsSubmitting(false);
+      setIsSubmitting(false);
     }
-    };
+  };
 
   return (
     <SafeAreaView style={common.safeArea}>
       <KeyboardAvoidingView
         style={common.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        // Remonte le formulaire sur iOS quand le clavier apparaît
       >
         <ScrollView
           contentContainerStyle={styles.container}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-          // Permet de garder le focus sur les inputs même en scrollant
         >
           <View style={common.logoContainer}>
             <Image
@@ -74,19 +76,17 @@ export default function Register() {
               style={common.logo}
               resizeMode="contain"
             />
-            {/* Logo de l’application */}
           </View>
 
+          {/* Indicateur visuel d'avancement  */}
           <View style={styles.stepsRow}>
             {[1, 2, 3].map((s) => (
               <View key={s} style={[styles.stepDot, s <= step && styles.stepDotActive]} />
             ))}
-            {/* Indicateur visuel des étapes */}
           </View>
 
           <View style={common.card}>
-            {/* Carte contenant les étapes du formulaire */}
-
+            {/* Étape 1 : Saisie des identifiants */}
             {step === 1 && (
               <>
                 <Text style={common.screenTitle}>Crée ton compte</Text>
@@ -128,10 +128,10 @@ export default function Register() {
               </>
             )}
 
+            {/* Étape 2 : Message de transition personnalisé */}
             {step === 2 && (
               <>
                 <Text style={styles.message}>Bienvenue {firstName}</Text>
-                {/* Message personnalisé */}
 
                 <Text style={common.screenSubtitle}>
                   Ici, pas de jugement — juste un espace de bienveillance pour t accompagner dans ton parcours.
@@ -148,6 +148,7 @@ export default function Register() {
               </>
             )}
 
+            {/* Étape 3 : Sélection de l'intention et validation finale */}
             {step === 3 && (
               <>
                 <Text style={common.screenTitle}>Ton objectif</Text>
@@ -160,11 +161,11 @@ export default function Register() {
                     key={obj.id}
                     style={[
                       styles.objectifButton,
+                      // Met en avant visuellement l'option active
                       objectif === obj.id && styles.objectifButtonSelected,
                     ]}
                     onPress={() => setObjectif(obj.id)}
                     activeOpacity={0.7}
-                    // Sélection de l’objectif
                   >
                     <Text
                       style={[
@@ -182,7 +183,6 @@ export default function Register() {
                   onPress={handleRegister}
                   disabled={isSubmitting}
                   size="full"
-                  // Bouton final d’inscription
                 />
 
                 <Button
@@ -193,7 +193,7 @@ export default function Register() {
                 />
               </>
             )}
-            </View>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -208,7 +208,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xl,
     gap: spacing.lg,
   },
-
   stepsRow: {
     flexDirection: 'row',
     justifyContent: 'center',

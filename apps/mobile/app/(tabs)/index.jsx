@@ -13,6 +13,7 @@ import { colors, spacing } from '../../src/theme/colors';
 import { api } from '../../src/services/api';
 import { useAuth } from '../../src/context/AuthContext';
 
+// Les 4 types de repas standards affichés sur le tableau de bord
 const MEAL_TYPES = [
   { id: 'PETIT_DEJEUNER', label: 'Petit-déjeuner' },
   { id: 'DEJEUNER', label: 'Déjeuner' },
@@ -20,6 +21,7 @@ const MEAL_TYPES = [
   { id: 'DINER', label: 'Dîner' },
 ];
 
+// Convertit un objet Date JavaScript en format texte "AAAA-MM-JJ" attendu par l'API
 function toDateStr(date) {
   if (typeof date === 'string') return date;
   const year = date.getFullYear();
@@ -43,17 +45,20 @@ export default function Dashboard() {
   const [streak, setStreak] = useState(0);
   const [showStreak, setShowStreak] = useState(false);
 
+  // Redirige vers l'écran de connexion si aucun utilisateur n'est authentifié
   useEffect(() => {
     if (!authLoading && !user) {
       router.replace('/login');
     }
   }, [authLoading, user]);
 
+  // Charge les données du jour et vérifie la série de connexions dès que l'utilisateur est connecté
   useEffect(() => {
     if (user) {
       fetchDataForDate(selectedDate);
       api.get('/stats/streak').then(data => {
         setStreak(data.streak);
+        // Affiche un bandeau de félicitations temporaire (5s) tous les 7 jours consécutifs
         if (data.streak > 0 && data.streak % 7 === 0) {
           setShowStreak(true);
           setTimeout(() => setShowStreak(false), 5000);
@@ -62,6 +67,7 @@ export default function Dashboard() {
     }
   }, [user]);
 
+  // Récupère en parallèle les repas et l'humeur enregistrés pour la date sélectionnée
   const fetchDataForDate = async (date) => {
     try {
       setIsLoadingMeals(true);
@@ -79,6 +85,7 @@ export default function Dashboard() {
     }
   };
 
+  // Met à jour la date active lors d'un clic sur le calendrier et recharge les données associées
   const handleSelectDay = (date) => {
     setSelectedDate(date);
     setSelectedMood(null);
@@ -86,6 +93,7 @@ export default function Dashboard() {
     fetchDataForDate(date);
   };
 
+  // Enregistre l'émotion choisie pour la journée sélectionnée
   const handleSelectMood = async (moodId) => {
     setSelectedMood(moodId);
     try {
@@ -101,6 +109,7 @@ export default function Dashboard() {
 
   const getMealForType = (mealType) => mealLogs.find((m) => m.mealType === mealType);
 
+  // Met à jour le repas existant (PATCH) ou en crée un nouveau s'il n'existait pas encore (POST)
   const handleUpdateMeal = async (mealType, newTitle, newDescription) => {
     const existing = getMealForType(mealType);
     if (existing) {
@@ -112,6 +121,7 @@ export default function Dashboard() {
     }
   };
 
+  // Coche ou décoche l'état "mangé" du repas (bascule l'état ou crée l'entrée)
   const handleMarkEaten = async (mealType) => {
     const existing = getMealForType(mealType);
     if (existing) {
@@ -123,6 +133,7 @@ export default function Dashboard() {
     }
   };
 
+  // Message d'encouragement progressif en fonction de la durée de la série
   const getStreakMessage = () => {
     if (streak >= 21) return '🌟 Incroyable ! 3 semaines de suivi. Tu avances vraiment bien.';
     if (streak >= 14) return '✨ 2 semaines consécutives ! Tu prends soin de toi chaque jour.';
@@ -146,6 +157,7 @@ export default function Dashboard() {
       >
         <Calendrier onSelectDay={handleSelectDay} />
 
+        {/* Message d'encouragement affiché lors des paliers de régularité */}
         {showStreak && (
           <View style={styles.streakCard}>
             <Text style={styles.streakText}>{getStreakMessage()}</Text>
@@ -158,6 +170,7 @@ export default function Dashboard() {
           <>
             <EmojiCard selectedMood={selectedMood} onSelectMood={handleSelectMood} />
 
+            {/* Génère dynamiquement une carte pour chaque créneau de la journée */}
             {MEAL_TYPES.map((meal) => {
               const log = getMealForType(meal.id);
               return (

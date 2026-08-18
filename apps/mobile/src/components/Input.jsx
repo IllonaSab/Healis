@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { TextInput, StyleSheet, View, TouchableOpacity, Image } from 'react-native';
 import { colors } from '../theme/colors';
 
-const EYE_OPEN = require('../../assets/icons/ouvert.png');
-const EYE_CLOSED = require('../../assets/icons/fermer.png');
+// Icônes de type switch/toggle pour basculer l'état
+const TOGGLE_ON = require('../../assets/icons/ouvert.png');
+const TOGGLE_OFF = require('../../assets/icons/fermer.png');
 
 export default function Input({
   value,
@@ -19,16 +20,25 @@ export default function Input({
   style,
   accessibilityLabel,
 }) {
+  // Gère l'affichage en clair ou masqué du texte sécurisé
   const [isVisible, setIsVisible] = useState(false);
 
   return (
     <View style={styles.wrapper}>
+      {/* Champ de saisie paramétrable */}
       <TextInput
-        style={[styles.input, multiline && styles.multiline, style, secureTextEntry && styles.inputWithIcon]}
+        style={[
+          styles.input,
+          multiline && styles.multiline,
+          style,
+          // Réserve de l'espace à droite si le bouton switch est présent
+          secureTextEntry && styles.inputWithIcon,
+        ]}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor={colors.gray}
+        // Masque le texte tant que le switch n'est pas activé (visible)
         secureTextEntry={secureTextEntry && !isVisible}
         multiline={multiline}
         numberOfLines={numberOfLines}
@@ -40,17 +50,20 @@ export default function Input({
         accessibilityLabel={accessibilityLabel || placeholder}
         accessibilityRole="search"
       />
+
+      {/* Bouton switch / toggle pour afficher ou masquer la saisie sécurisée */}
       {secureTextEntry && (
         <TouchableOpacity
-          style={styles.eyeButton}
-          onPress={() => setIsVisible(v => !v)}
+          style={styles.toggleButton}
+          onPress={() => setIsVisible((v) => !v)}
           accessible={true}
           accessibilityLabel={isVisible ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
-          accessibilityRole="button"
+          accessibilityRole="switch"
+          accessibilityState={{ checked: isVisible }}
         >
           <Image
-            source={isVisible ? EYE_OPEN : EYE_CLOSED}
-            style={styles.eyeIcon}
+            source={isVisible ? TOGGLE_ON : TOGGLE_OFF}
+            style={styles.toggleIcon}
             resizeMode="contain"
           />
         </TouchableOpacity>
@@ -75,18 +88,18 @@ const styles = StyleSheet.create({
     borderColor: '#E5E5E5',
   },
   inputWithIcon: {
-    paddingRight: 44,
+    paddingRight: 48, // Espace pour ne pas chevaucher le switch
   },
   multiline: {
     textAlignVertical: 'top',
   },
-  eyeButton: {
+  toggleButton: {
     position: 'absolute',
     right: 12,
     padding: 4,
   },
-  eyeIcon: {
-    width: 30,
-    height: 30,
+  toggleIcon: {
+    width: 28,
+    height: 28,
   },
 });

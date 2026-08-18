@@ -20,18 +20,22 @@ import { api, saveUser } from '../../src/services/api';
 export default function Profil() {
   const { user, logout, setUser } = useAuth();
 
+  // États pour afficher/masquer les fenêtres modales
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showPlanModal, setShowPlanModal] = useState(false);
+  // États contrôlant les champs de saisie du mot de passe
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Déconnexion complète : supprime la session locale et renvoie vers la page de login
   const handleLogout = async () => {
     await logout();
     router.replace('/login');
   };
 
+  // Récupère les données à jour depuis le serveur (ex: statut du plan après un paiement) et met à jour le stockage local
   const handleRefreshUser = async () => {
     try {
       const updatedUser = await api.get('/auth/me');
@@ -42,6 +46,7 @@ export default function Profil() {
     }
   };
 
+  // Validation côté client puis envoi de la requête de modification de mot de passe
   const handleChangePassword = async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
       Alert.alert('Champs manquants', 'Tous les champs sont requis.');
@@ -70,6 +75,7 @@ export default function Profil() {
     }
   };
 
+  // Mise à jour manuelle du plan utilisateur (pour repasser en FREE)
   const handleChangePlan = async (plan) => {
     try {
       await api.patch('/auth/plan', { plan });
@@ -89,6 +95,7 @@ export default function Profil() {
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
+        {/* Section avatar : affiche la première lettre du prénom en majuscule */}
         <View style={styles.avatarSection}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>
@@ -102,6 +109,7 @@ export default function Profil() {
           </View>
         </View>
 
+        {/* Informations du compte utilisateur */}
         <View style={common.card}>
           <Text style={styles.sectionTitle}>Mon compte</Text>
 
@@ -130,6 +138,7 @@ export default function Profil() {
               <TouchableOpacity onPress={() => setShowPlanModal(true)}>
                 <Text style={styles.editLink}>Modifier</Text>
               </TouchableOpacity>
+              {/* Bouton de rafraîchissement manuel des données du compte */}
               <TouchableOpacity onPress={handleRefreshUser}>
                 <Text style={styles.editLink}>↻</Text>
               </TouchableOpacity>
@@ -164,7 +173,7 @@ export default function Profil() {
         <Text style={styles.version}>Healis v1.0.0</Text>
       </ScrollView>
 
-      {/* Modal mot de passe */}
+      {/* Modal de changement de mot de passe */}
       <Modal visible={showPasswordModal} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -203,7 +212,7 @@ export default function Profil() {
         </View>
       </Modal>
 
-      {/* Modal plan */}
+      {/* Modal de choix du plan et paiement Stripe */}
       <Modal visible={showPlanModal} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -221,9 +230,12 @@ export default function Profil() {
               style={[styles.planOption, user?.plan === 'PREMIUM' && styles.planOptionSelected]}
               onPress={async () => {
                 try {
+                  // Demande au backend de créer une session de paiement Stripe
                   const data = await api.post('/payment/create-checkout', {});
+                  // Ouvre la page Stripe Checkout sécurisée dans le navigateur in-app
                   const { openBrowserAsync } = await import('expo-web-browser');
                   await openBrowserAsync(data.url);
+                  // À la fermeture du navigateur, on actualise les informations pour vérifier si le plan est passé en PREMIUM
                   await handleRefreshUser();
                   setShowPlanModal(false);
                 } catch (error) {

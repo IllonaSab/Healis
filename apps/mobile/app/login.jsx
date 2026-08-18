@@ -25,69 +25,59 @@ const APPLE_ICON = require('../assets/social/apple.png');
 
 export default function Login() {
   const { login, setUser } = useAuth();
-  // Accès au contexte d’auth : login() + mise à jour de l’utilisateur
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // États du formulaire de connexion
 
+  // Hook personnalisé pour Google OAuth : récupère le token d'accès Google puis le valide auprès du backend
   const { request, promptAsync } = useGoogleAuth(async (accessToken) => {
     try {
+      // Envoie le token Google à l'API pour créer ou connecter le compte
       const data = await api.post('/auth/google', { accessToken });
-      // Envoie le token Google au backend pour validation
 
+      // Enregistre le JWT retourné en local et met à jour l'utilisateur dans le contexte
       await saveToken(data.token);
-      // Sauvegarde du JWT localement
-
       setUser(data.user);
-      // Mise à jour du contexte utilisateur
 
+      // Redirige vers l'écran d'accueil sans possibilité de retour arrière vers le login
       router.replace('/');
-      // Redirection vers l’accueil
     } catch (error) {
       Alert.alert('Erreur Google', error.message);
-      // Gestion des erreurs Google OAuth
     }
   });
 
-
+  // Connexion classique par email et mot de passe
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Champs manquants', 'Email et mot de passe sont requis.');
       return;
-      // Validation minimale du formulaire
     }
 
     setIsSubmitting(true);
 
     try {
+      // Appelle la méthode login du AuthContext (requête HTTP + stockage sécurisé du token)
       await login(email, password);
-      // Appelle la fonction login() du contexte → requête backend
-
       router.replace('/');
-      // Redirection après connexion réussie
     } catch (error) {
       Alert.alert('Erreur', error.message);
-      // Affiche l’erreur renvoyée par le backend
     } finally {
       setIsSubmitting(false);
     }
   };
 
-
-return (
+  return (
     <SafeAreaView style={common.safeArea}>
+      {/* Ajuste la vue sur iOS pour que le clavier ne masque pas le formulaire */}
       <KeyboardAvoidingView
         style={common.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        // Remonte le formulaire sur iOS quand le clavier apparaît
       >
         <ScrollView
           contentContainerStyle={styles.container}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-          // Permet de garder le focus sur les inputs même en scrollant
         >
           <View style={common.logoContainer}>
             <Image
@@ -95,12 +85,9 @@ return (
               style={common.logo}
               resizeMode="contain"
             />
-            {/* Logo de l’application */}
           </View>
 
           <View style={common.card}>
-            {/* Carte contenant le formulaire */}
-
             <Text style={common.screenTitle}>Connecte-toi</Text>
 
             <Input
@@ -109,7 +96,6 @@ return (
               placeholder="Adresse email"
               autoCapitalize="none"
               keyboardType="email-address"
-              // Champ email
             />
 
             <Input
@@ -117,7 +103,6 @@ return (
               onChangeText={setPassword}
               placeholder="Mot de passe"
               secureTextEntry
-              // Champ mot de passe
             />
 
             <Button
@@ -125,28 +110,27 @@ return (
               onPress={handleLogin}
               disabled={isSubmitting}
               size="full"
-              // Bouton de connexion
-          />
-          
-          <TouchableOpacity onPress={() => router.push('/forgotPasseword')}>
-  <Text style={styles.forgotText}>{'Mot de passe oublié ?'}</Text>
-</TouchableOpacity>
-           {/* lien mot de passe oublié */}
+            />
 
+            {/* Ouvre l'écran de réinitialisation sans effacer la pile */}
+            <TouchableOpacity onPress={() => router.push('/forgotPasseword')}>
+              <Text style={styles.forgotText}>{'Mot de passe oublié ?'}</Text>
+            </TouchableOpacity>
+
+            {/* Remplace la vue actuelle par l'inscription */}
             <TouchableOpacity onPress={() => router.replace('/register')}>
               <Text style={common.switchText}>
                 Pas encore de compte ? S inscrire
               </Text>
-              {/* Lien vers l’inscription */}
             </TouchableOpacity>
 
             <View style={common.dividerRow}>
               <View style={common.dividerLine} />
               <Text style={common.dividerText}>ou</Text>
               <View style={common.dividerLine} />
-              {/* Séparateur visuel */}
             </View>
 
+            {/* Déclenche la fenêtre de connexion Google officielle */}
             <Button
               label="Continuer avec Google"
               onPress={() => promptAsync()}
@@ -154,7 +138,6 @@ return (
               size="full"
               icon={GOOGLE_ICON}
               disabled={!request}
-              // Connexion via Google OAuth
             />
 
             <Button
@@ -165,7 +148,6 @@ return (
               variant="social"
               size="full"
               icon={APPLE_ICON}
-              // Placeholder pour Apple OAuth
             />
           </View>
         </ScrollView>
@@ -184,7 +166,7 @@ const styles = StyleSheet.create({
   },
   forgotText: {
     textAlign: 'center',
-  color: colors.textSecondary,
-  fontSize: 13,
-},
+    color: colors.textSecondary,
+    fontSize: 13,
+  },
 });

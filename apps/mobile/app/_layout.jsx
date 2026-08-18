@@ -15,7 +15,7 @@ export default function RootLayout() {
         <Stack.Screen name="login" />
         {/* Écran de connexion */}
 
-        <Stack.Screen name="forgotPasseword" />
+        <Stack.Screen name="forgotPassword" />
         {/* Écran de réinitialisation du mot de passe */}
         
         <Stack.Screen name="register" />

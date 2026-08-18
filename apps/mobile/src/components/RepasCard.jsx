@@ -26,38 +26,37 @@ export default function RepasCard({
   onMarkEaten,
   onUpdateMeal,
 }) {
+  // Contrôle l'ouverture et la fermeture de la fenêtre modale de modification
   const [isEditing, setIsEditing] = useState(false);
-  // État du modal d’édition
 
+  // États locaux temporaires pour ne pas modifier l'affichage tant que l'utilisateur n'a pas validé
   const [draftTitle, setDraftTitle] = useState(title || '');
   const [draftDescription, setDraftDescription] = useState(description || '');
-  // Champs temporaires utilisés dans le modal
 
+  // Ouvre la modale et pré-remplit les champs avec les données actuelles
   const handleOpen = () => {
-    // Ouvre le modal et recharge les valeurs actuelles
     setDraftTitle(title || '');
     setDraftDescription(description || '');
     setIsEditing(true);
   };
 
+  // Envoie les modifications au parent (Dashboard) si le titre n'est pas vide
   const handleSave = () => {
-    // Enregistre uniquement si un titre est présent
     if (draftTitle.trim()) {
       onUpdateMeal?.(draftTitle.trim(), draftDescription.trim());
     }
     setIsEditing(false);
   };
 
+  // Détecte si le repas a été renseigné ou s'il utilise un texte par défaut
   const isEmpty =
     !title ||
     title === 'Aucun repas renseigné' ||
     title === 'Repas non détaillé';
-  // Détermine si le repas n’a pas encore été renseigné
 
-    return (
+  return (
     <View style={styles.container}>
-
-      {/* --- En‑tête : nom du repas + statut + lien Modifier --- */}
+      {/* En-tête : Intitulé du créneau horaire, statut (Prévu/Terminé) et lien d'édition */}
       <View style={styles.headerRow}>
         <Text style={styles.mealLabel}>{mealLabel}</Text>
 
@@ -70,8 +69,8 @@ export default function RepasCard({
         </View>
       </View>
 
-
-        <TouchableOpacity
+      {/* Zone cliquable centrale : affiche l'icône, le titre et la description du repas */}
+      <TouchableOpacity
         style={styles.descriptionRow}
         onPress={handleOpen}
         activeOpacity={0.7}
@@ -93,7 +92,7 @@ export default function RepasCard({
         </View>
       </TouchableOpacity>
 
-
+      {/* Bouton d'action pour marquer le repas comme pris (change de couleur et d'intitulé si déjà mangé) */}
       <Button
         label={eaten ? 'Repas marqué comme mangé' : "J'ai mangé ce repas"}
         onPress={onMarkEaten}
@@ -102,19 +101,18 @@ export default function RepasCard({
         disabled={isEditing}
       />
 
-
-            <Modal visible={isEditing} animationType="slide" transparent>
+      {/* Modale d'édition avec formulaire et remontée automatique au-dessus du clavier sur iOS */}
+      <Modal visible={isEditing} animationType="slide" transparent>
         <KeyboardAvoidingView
           style={styles.modalOverlay}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
           <View style={styles.modalContent}>
-
             <Text style={styles.modalTitle}>
               Modifier — {mealLabel}
             </Text>
 
-            {/* Champ titre */}
+            {/* Saisie du titre */}
             <Text style={styles.inputLabel}>Nom du plat</Text>
             <Input
               value={draftTitle}
@@ -123,7 +121,7 @@ export default function RepasCard({
               autoFocus
             />
 
-            {/* Champ description */}
+            {/* Saisie détaillée des ingrédients ou notes */}
             <Text style={styles.inputLabel}>
               Ingrédients / description
             </Text>
@@ -134,7 +132,7 @@ export default function RepasCard({
               multiline
             />
 
-            {/* Boutons d’action */}
+            {/* Boutons d'action : validation et annulation */}
             <Button
               label="Enregistrer"
               onPress={handleSave}
@@ -148,14 +146,12 @@ export default function RepasCard({
               disabled={!draftTitle.trim()}
               size="full"
             />
-
           </View>
         </KeyboardAvoidingView>
       </Modal>
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {

@@ -18,6 +18,7 @@ import Button from '../src/components/Button';
 import { api } from '../src/services/api';
 
 export default function ForgotPassword() {
+  // Gère le passage entre l'étape 1 (saisie de l'email) et l'étape 2 (saisie du code et nouveau mot de passe)
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
@@ -25,22 +26,25 @@ export default function ForgotPassword() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-const handleSendCode = async () => {
-  if (!email) {
-    Alert.alert('Champ manquant', 'Entre ton adresse email.');
-    return;
-  }
-  setIsSubmitting(true);
-  try {
-    await api.post('/auth/forgot-password', { email });
-    setStep(2);
-  } catch (error) {
-    Alert.alert('Erreur', error.message);
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  // Étape 1 : envoie l'email au backend pour déclencher la génération et l'envoi du code par mail
+  const handleSendCode = async () => {
+    if (!email) {
+      Alert.alert('Champ manquant', 'Entre ton adresse email.');
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      await api.post('/auth/forgot-password', { email });
+      // Si la requête réussit, on bascule vers le formulaire de réinitialisation
+      setStep(2);
+    } catch (error) {
+      Alert.alert('Erreur', error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
+  // Étape 2 : vérifie que le code correspond et enregistre le nouveau mot de passe
   const handleResetPassword = async () => {
     if (!code || !newPassword || !confirmPassword) {
       Alert.alert('Champs manquants', 'Tous les champs sont requis.');
@@ -53,6 +57,7 @@ const handleSendCode = async () => {
     setIsSubmitting(true);
     try {
       await api.post('/auth/reset-password', { email, code, newPassword });
+      // Alerte de confirmation avec redirection automatique vers la connexion au clic
       Alert.alert('Succès', 'Mot de passe réinitialisé !', [
         { text: 'Se connecter', onPress: () => router.replace('/login') },
       ]);
@@ -65,6 +70,7 @@ const handleSendCode = async () => {
 
   return (
     <SafeAreaView style={common.safeArea}>
+      {/* Ajuste la position du formulaire sur iOS quand le clavier apparaît */}
       <KeyboardAvoidingView
         style={common.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -74,6 +80,7 @@ const handleSendCode = async () => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={common.card}>
+            {/* Affichage conditionnel selon l'étape actuelle */}
             {step === 1 ? (
               <>
                 <Text style={common.screenTitle}>Mot de passe oublié</Text>
@@ -88,10 +95,10 @@ const handleSendCode = async () => {
                   keyboardType="email-address"
                 />
                 <Button
-                label={isSubmitting ? '...' : 'Envoyer le code'}
-                onPress={handleSendCode}
-                disabled={isSubmitting}
-                size="full"
+                  label={isSubmitting ? '...' : 'Envoyer le code'}
+                  onPress={handleSendCode}
+                  disabled={isSubmitting}
+                  size="full"
                 />
               </>
             ) : (

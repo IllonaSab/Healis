@@ -13,30 +13,30 @@ export default function Button({
 }) {
   return (
     <TouchableOpacity
+      // Combine dynamiquement le style de base avec la variante, la taille et l'état actif/inactif
       style={[
         styles.base,
         styles[variant],
         styles[`size_${size}`],
         disabled && styles.disabled,
         icon && styles.withIcon,
-        // Construction dynamique du style selon variant, taille, état disabled, présence d’icône
       ]}
       onPress={onPress}
       disabled={disabled}
       activeOpacity={0.8}
+      // Paramètres d'accessibilité pour les lecteurs d'écran (TalkBack / VoiceOver)
       accessible={true}
       accessibilityLabel={accessibilityLabel || label}
       accessibilityRole="button"
       accessibilityState={{ disabled }}
-      // Accessibilité : rôle bouton + état disabled + label lisible par VoiceOver
     >
+      {/* Affiche l'icône à gauche du texte si elle est fournie */}
       {icon && <Image source={icon} style={styles.icon} resizeMode="contain" />}
-      {/* Affiche l’icône si fournie */}
 
+      {/* Applique la typographie et la couleur de texte adaptées à la variante */}
       <Text style={[styles.label, styles[`label_${variant}`]]}>
         {label}
       </Text>
-      {/* Style du texte dépend du variant (primary, outline, social, etc.) */}
     </TouchableOpacity>
   );
 }
@@ -46,22 +46,19 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    // Style de base commun à tous les boutons
   },
 
   withIcon: {
     flexDirection: 'row',
     gap: 8,
-    // Mise en ligne du texte + icône
   },
 
   icon: {
     width: 20,
     height: 20,
-    // Taille standard des icônes
   },
 
-  // Variants visuels du bouton
+  // Variantes graphiques
   primary: {
     backgroundColor: colors.accent,
   },
@@ -94,7 +91,7 @@ const styles = StyleSheet.create({
     borderColor: '#E5E5E5',
   },
 
-  // Tailles du bouton
+  // Tailles
   size_sm: {
     paddingVertical: 6,
     paddingHorizontal: 12,
@@ -115,7 +112,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 
-  // Styles du texte selon variant
+  // Typographies selon la variante
   label: {
     fontSize: 14,
     fontWeight: '700',
@@ -149,6 +146,5 @@ const styles = StyleSheet.create({
 
   disabled: {
     backgroundColor: '#A0C4B4',
-    // Style appliqué quand le bouton est désactivé
   },
 });

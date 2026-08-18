@@ -19,6 +19,7 @@ const LOGO = require('../../assets/tabs/header-logo.png');
 export default function Chat() {
   const insets = useSafeAreaInsets();
 
+  // Stocke tous les messages de la conversation
   const [messages, setMessages] = useState([
     {
       id: '0',
@@ -31,6 +32,7 @@ export default function Chat() {
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef(null);
 
+  // Fait défiler automatiquement la liste tout en bas dès qu'un nouveau message est ajouté
   useEffect(() => {
     scrollRef.current?.scrollToEnd({ animated: true });
   }, [messages]);
@@ -39,21 +41,25 @@ export default function Chat() {
     const text = input.trim();
     if (!text || isLoading) return;
 
+    // Ajoute immédiatement le message utilisateur dans l'interface pour un retour instantané
     const userMessage = { id: Date.now().toString(), role: 'user', content: text };
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
 
     try {
+      // Envoie la question et tout l'historique précédent à l'API pour conserver le contexte de discussion
       const response = await api.post('/chat', {
         message: text,
         history: messages.map((m) => ({ role: m.role, content: m.content })),
       });
+      // Ajoute la réponse renvoyée par l'IA
       setMessages((prev) => [
         ...prev,
         { id: (Date.now() + 1).toString(), role: 'assistant', content: response.reply },
       ]);
     } catch (error) {
+      // Message de secours bienveillant en cas de problème de réseau ou d'erreur serveur
       setMessages((prev) => [
         ...prev,
         {
@@ -73,6 +79,7 @@ export default function Chat() {
         <Image source={LOGO} style={styles.logo} resizeMode="contain" />
       </View>
 
+      {/* Décale l'écran vers le haut sur iOS lorsque le clavier virtuel apparaît pour ne pas masquer le champ texte */}
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -90,6 +97,7 @@ export default function Chat() {
               key={msg.id}
               style={[
                 styles.bubbleWrapper,
+                // Aligne la bulle à droite si c'est l'utilisateur, à gauche si c'est l'assistant
                 msg.role === 'user' ? styles.bubbleWrapperUser : styles.bubbleWrapperAssistant,
               ]}
             >
@@ -101,6 +109,7 @@ export default function Chat() {
             </View>
           ))}
 
+          {/* Affiche un indicateur de chargement tant que l'IA génère sa réponse */}
           {isLoading && (
             <View style={[styles.bubbleWrapper, styles.bubbleWrapperAssistant]}>
               <View style={[styles.bubble, styles.bubbleAssistant]}>

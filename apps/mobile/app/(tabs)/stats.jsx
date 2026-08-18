@@ -13,6 +13,7 @@ import { api } from '../../src/services/api';
 
 const DAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 
+// Palette de couleurs pour représenter visuellement chaque état émotionnel
 const MOOD_COLORS = {
   excellent: '#15804C',
   bien: '#4CAF50',
@@ -27,6 +28,7 @@ const MOOD_LABELS = {
   triste: 'Triste',
 };
 
+// Génère un tableau des 7 derniers jours au format "AAAA-MM-JJ"
 function getLastSevenDays() {
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
@@ -50,6 +52,7 @@ export default function Stats() {
   const fetchStats = async () => {
     try {
       setIsLoading(true);
+      // Lance en parallèle les appels pour les 7 dates afin de charger toutes les métriques en une seule passe
       const results = await Promise.all(
         days.map(async (date) => {
           const [emotions, water, meals] = await Promise.all([
@@ -61,16 +64,19 @@ export default function Stats() {
         })
       );
 
+      // Met en forme l'humeur dominante pour chaque jour (ou null si non renseignée)
       setEmotionData(results.map(r => ({
         date: r.date,
         mood: r.emotions.length > 0 ? r.emotions[0].emotion : null,
       })));
 
+      // Extrait le volume total d'eau bu par jour
       setWaterData(results.map(r => ({
         date: r.date,
         total: r.water?.total || 0,
       })));
 
+      // Compte uniquement le nombre de repas validés ('eaten: true') sur la journée
       setMealData(results.map(r => ({
         date: r.date,
         count: r.meals.filter(m => m.eaten).length,
@@ -82,6 +88,7 @@ export default function Stats() {
     }
   };
 
+  // Valeur max pour calculer la hauteur relative des barres (minimum 2L)
   const maxWater = Math.max(...waterData.map(d => d.total), 2);
 
   if (isLoading) {
@@ -99,9 +106,9 @@ export default function Stats() {
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.title}>Mes 7 derniers jours</Text>
-        <Text style={styles.subtitle}>Ton évolution cette semaine 🌱</Text>
+        <Text style={styles.subtitle}>Ton évolution cette semaine </Text>
 
-        {/* Émotions */}
+        {/* Graphique 1 : Pastilles de couleur représentant l'humeur de chaque jour */}
         <View style={common.card}>
           <Text style={styles.cardTitle}>Humeur de la semaine</Text>
           <View style={styles.moodRow}>
@@ -127,7 +134,7 @@ export default function Stats() {
           </View>
         </View>
 
-        {/* Hydratation */}
+        {/* Graphique 2 : Histogramme vertical de consommation d'eau */}
         <View style={common.card}>
           <Text style={styles.cardTitle}>Hydratation (litres)</Text>
           <View style={styles.barChart}>
@@ -137,6 +144,7 @@ export default function Stats() {
                   {item.total > 0 ? `${item.total}L` : ''}
                 </Text>
                 <View style={styles.barWrapper}>
+                  {/* Hauteur calculée proportionnellement au maxWater (max 80px de haut) */}
                   <View
                     style={[
                       styles.bar,
@@ -154,13 +162,14 @@ export default function Stats() {
           <Text style={styles.chartNote}>Objectif : 2L par jour</Text>
         </View>
 
-        {/* Repas */}
+        {/* Graphique 3 : Indicateur de repas (4 points par jour) */}
         <View style={common.card}>
           <Text style={styles.cardTitle}>Repas notés</Text>
           <View style={styles.mealGrid}>
             {mealData.map((item, i) => (
               <View key={item.date} style={styles.mealColumn}>
                 <View style={styles.mealDots}>
+                  {/* Remplit en vert les points correspondant aux repas enregistrés (sur 4 possibles) */}
                   {Array.from({ length: 4 }, (_, j) => (
                     <View
                       key={j}
@@ -211,7 +220,6 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     marginBottom: spacing.md,
   },
-  // Émotions
   moodRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -250,7 +258,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: colors.textSecondary,
   },
-  // Hydratation
   barChart: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -284,7 +291,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 4,
   },
-  // Repas
   mealGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -307,7 +313,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: colors.textSecondary,
   },
-  // Encouragement
   encouragement: {
     backgroundColor: '#E8F5EC',
     borderRadius: 12,

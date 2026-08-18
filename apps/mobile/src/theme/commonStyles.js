@@ -1,7 +1,9 @@
 import { StyleSheet } from 'react-native';
 import { colors, spacing } from './colors';
 
+// Styles globaux réutilisables à travers tous les écrans pour éviter la duplication de code
 export const common = StyleSheet.create({
+  // Conteneur principal plein écran respectant les zones sécurisées (encoches / barres système)
   safeArea: {
     flex: 1,
     backgroundColor: colors.background,
@@ -9,6 +11,8 @@ export const common = StyleSheet.create({
   flex: {
     flex: 1,
   },
+
+  // Carte blanche standard avec ombrage doux (iOS shadow + Android elevation)
   card: {
     backgroundColor: colors.white,
     borderRadius: 16,
@@ -20,6 +24,8 @@ export const common = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
   },
+
+  // Typographies d'en-tête d'écran
   screenTitle: {
     fontSize: 18,
     fontWeight: '700',
@@ -32,6 +38,8 @@ export const common = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 22,
   },
+
+  // Ligne de séparation avec texte au milieu (ex: "OU" entre connexion email et OAuth Google)
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -47,12 +55,16 @@ export const common = StyleSheet.create({
     fontSize: 12,
     color: colors.textSecondary,
   },
+
+  // Lien textuel de bascule d'écran (ex: "Pas encore de compte ? S'inscrire")
   switchText: {
     textAlign: 'center',
     color: colors.accent,
     fontSize: 13,
     fontWeight: '600',
   },
+
+  // Conteneur et dimensions standardisées pour le logo de l'application
   logoContainer: {
     alignItems: 'center',
     gap: 4,
@@ -61,6 +73,8 @@ export const common = StyleSheet.create({
     width: 285,
     height: 48,
   },
+
+  // Centrage rapide horizontal et vertical
   centered: {
     justifyContent: 'center',
     alignItems: 'center',

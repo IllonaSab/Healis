@@ -2,30 +2,29 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { colors } from '../theme/colors';
 
+// Définition des 4 humeurs avec leur identifiant unique, leur image locale et leur libellé
 const MOODS = [
   { id: 'excellent', image: require('../../assets/emojis/excellent.png'), label: 'Excellent' },
   { id: 'bien', image: require('../../assets/emojis/bien.png'), label: 'Bien' },
   { id: 'mitige', image: require('../../assets/emojis/mitige.png'), label: 'Mitigé(e)' },
   { id: 'triste', image: require('../../assets/emojis/triste.png'), label: 'Triste' },
 ];
-// Liste des humeurs disponibles + image + label
-
 
 export default function EmojiCard({ selectedMood, onSelectMood }) {
   return (
     <View
       style={styles.container}
+      // Configure l'accessibilité globale du groupe comme un ensemble d'options exclusives (radio group)
       accessible={true}
       accessibilityLabel="Comment te sens-tu aujourd'hui ?"
       accessibilityRole="radiogroup"
-      // Le composant est annoncé comme un groupe de boutons radio pour l’accessibilité
     >
       <Text style={styles.title}>Comment te sens-tu aujourd hui ?</Text>
 
       <View style={styles.moodsRow}>
         {MOODS.map((mood) => {
+          // Vérifie si l'émotion courante correspond à celle sélectionnée dans le Dashboard
           const isSelected = mood.id === selectedMood;
-          // Détermine si l’humeur affichée est celle sélectionnée
 
           return (
             <TouchableOpacity
@@ -33,17 +32,17 @@ export default function EmojiCard({ selectedMood, onSelectMood }) {
               style={styles.moodColumn}
               onPress={() => onSelectMood?.(mood.id)}
               activeOpacity={0.7}
+              // Paramètres individuels pour lecteurs d'écran (bouton radio sélectionné ou non)
               accessible={true}
               accessibilityLabel={mood.label}
               accessibilityRole="radio"
               accessibilityState={{ selected: isSelected }}
-              // Chaque humeur est un bouton radio accessible
             >
+              {/* Conteneur circulaire de l'image : applique une bordure et un fond vert clair si sélectionné */}
               <View
                 style={[
                   styles.emojiCircle,
                   isSelected && styles.emojiCircleSelected,
-                  // Cercle coloré si sélectionné
                 ]}
               >
                 <Image
@@ -51,14 +50,13 @@ export default function EmojiCard({ selectedMood, onSelectMood }) {
                   style={styles.emojiImage}
                   resizeMode="contain"
                 />
-                {/* Affichage de l’emoji */}
               </View>
 
+              {/* Texte sous l'emoji avec mise en gras et couleur accentuée si actif */}
               <Text
                 style={[
                   styles.moodLabel,
                   isSelected && styles.moodLabelSelected,
-                  // Label mis en avant si sélectionné
                 ]}
               >
                 {mood.label}
@@ -69,7 +67,6 @@ export default function EmojiCard({ selectedMood, onSelectMood }) {
       </View>
 
       <View style={styles.divider} />
-      {/* Ligne de séparation visuelle */}
     </View>
   );
 }
