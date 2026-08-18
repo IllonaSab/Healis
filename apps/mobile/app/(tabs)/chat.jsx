@@ -5,16 +5,14 @@ import {
   Image,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
 } from 'react-native';
-
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing } from '../../src/theme/colors';
 import { api } from '../../src/services/api';
-import Input from '../../src/components/Input';
+import ChatInput from '../../src/components/ChatInput';
 
 const LOGO = require('../../assets/tabs/header-logo.png');
 
@@ -25,7 +23,7 @@ export default function Chat() {
     {
       id: '0',
       role: 'assistant',
-      content: "Bonjour 🌱 Je suis toi, dans quelques années. Une version apaisée, qui a trouvé son chemin. Je suis là pour t'écouter, sans jugement. Comment tu te sens aujourd'hui ?",
+      content: "Bonjour, Je suis toi, dans quelques années. Une version apaisée, qui a trouvé son chemin. Je suis là pour t'écouter, sans jugement. Comment tu te sens aujourd'hui ?",
     },
   ]);
 
@@ -51,14 +49,9 @@ export default function Chat() {
         message: text,
         history: messages.map((m) => ({ role: m.role, content: m.content })),
       });
-
       setMessages((prev) => [
         ...prev,
-        {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: response.reply,
-        },
+        { id: (Date.now() + 1).toString(), role: 'assistant', content: response.reply },
       ]);
     } catch (error) {
       setMessages((prev) => [
@@ -66,7 +59,7 @@ export default function Chat() {
         {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content: "Je suis là, mais quelque chose m'empêche de te répondre en ce moment. Réessaie dans un instant 🌿",
+          content: "Je suis là, mais quelque chose m'empêche de te répondre en ce moment. Réessaie dans un instant",
         },
       ]);
     } finally {
@@ -75,15 +68,15 @@ export default function Chat() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['left', 'right', 'bottom']}>
-      <View style={[styles.header, { paddingTop: insets.top, height: 64 + insets.top }]}>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.header}>
         <Image source={LOGO} style={styles.logo} resizeMode="contain" />
       </View>
 
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={60}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top + 65 : 0}
       >
         <ScrollView
           ref={scrollRef}
@@ -117,24 +110,12 @@ export default function Chat() {
           )}
         </ScrollView>
 
-        <View style={styles.inputRow}>
-          <Input
-            value={input}
-            onChangeText={setInput}
-            placeholder="Écris ce que tu ressens..."
-            maxLength={500}
-            multiline
-            style={styles.chatInput}
-          />
-          <TouchableOpacity
-            style={[styles.sendButton, (!input.trim() || isLoading) && styles.sendButtonDisabled]}
-            onPress={sendMessage}
-            disabled={!input.trim() || isLoading}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.sendIcon}>↑</Text>
-          </TouchableOpacity>
-        </View>
+        <ChatInput
+          value={input}
+          onChangeText={setInput}
+          onSend={sendMessage}
+          disabled={!input.trim() || isLoading}
+        />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -150,23 +131,23 @@ const styles = StyleSheet.create({
   },
   header: {
     width: '100%',
+    height: 70,
     backgroundColor: colors.white,
     alignItems: 'center',
-    justifyContent: 'flex-end',
-    paddingBottom: 8,
+    justifyContent: 'center',
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
   },
   logo: {
-    width: 285,
-    height: 48,
+    width: 200,
+    height: 36,
   },
   messagesContainer: {
     flex: 1,
   },
   messagesContent: {
     padding: spacing.lg,
-    paddingBottom: spacing.lg,
+    paddingBottom: spacing.xl,
     gap: spacing.sm,
   },
   bubbleWrapper: {
@@ -207,50 +188,5 @@ const styles = StyleSheet.create({
   },
   bubbleTextAssistant: {
     color: colors.textPrimary,
-  },
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    paddingBottom: 100,
-    borderTopWidth: 1,
-    borderTopColor: '#F0F0F0',
-  },
-  input: {
-    flex: 1,
-    minHeight: 40,
-    maxHeight: 100,
-    backgroundColor: colors.background,
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    fontSize: 14,
-    color: colors.textPrimary,
-    borderWidth: 1,
-    borderColor: '#E5E5E5',
-  },
-  chatInput: {
-  flex: 1,
-  minHeight: 40,
-  maxHeight: 100,
-},
-  
-  sendButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sendButtonDisabled: {
-    backgroundColor: '#A0C4B4',
-  },
-  sendIcon: {
-    color: colors.white,
-    fontSize: 18,
-    fontWeight: '700',
   },
 });
