@@ -7,11 +7,13 @@ const isRenderDb = process.env.DATABASE_URL && process.env.DATABASE_URL.includes
 
 const adapter = new PrismaPg({ 
   connectionString: process.env.DATABASE_URL,
+  // Active la connexion chiffrée (SSL) obligatoire pour parler à la base de données en ligne sur Render
   ssl: (process.env.NODE_ENV === 'production' || isRenderDb) 
     ? { rejectUnauthorized: false } 
     : false,
 });
 
+// Crée le client Prisma qui permet d'exécuter toutes les requêtes en base de données
 const prisma = new PrismaClient({ adapter });
 
 module.exports = {

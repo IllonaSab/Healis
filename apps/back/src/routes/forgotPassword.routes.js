@@ -1,6 +1,8 @@
 const express = require('express');
+// Le module natif 'crypto' permet de créer des chaînes de caractères aléatoires et hautement sécurisées
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
+// 'Resend' est le service tiers qui se charge d'expédier les emails
 const { Resend } = require('resend');
 const { prisma } = require('../db.js');
 
@@ -28,19 +30,25 @@ router.post('/forgot-password', async (req, res) => {
 
     const user = await prisma.user.findUnique({ where: { email } });
 
+    // Sécurité : même si l'email n'existe pas, on renvoie le même message pour empêcher un pirate de deviner quels comptes existent
     if (!user) {
       return res.json({ message: 'Si cet email existe, un code a été envoyé.' });
     }
 
+    // On génère 32 octets aléatoires convertis en texte hexadécimal
     const token = crypto.randomBytes(32).toString('hex');
+    // On définit une durée de validité de 1 heure (60 min * 60 s * 1000 ms) à partir de maintenant
     const expiry = new Date(Date.now() + 60 * 60 * 1000);
+    // On extrait les 6 premiers caractères du token en majuscules pour faire un code facile à taper pour l'utilisateur
     const code = token.substring(0, 6).toUpperCase();
 
+    // On enregistre le token et sa date limite d'utilisation directement sur le profil de l'utilisateur
     await prisma.user.update({
       where: { email },
       data: { resetToken: token, resetTokenExpiry: expiry },
     });
 
+    // Envoi de l'email au format HTML contenant le code à 6 caractères
     await resend.emails.send({
       from: 'Healis <onboarding@resend.dev>',
       to: email,
@@ -79,21 +87,26 @@ router.post('/reset-password', async (req, res) => {
 
     const user = await prisma.user.findUnique({ where: { email } });
 
+    // On vérifie que l'utilisateur a bien fait une demande de réinitialisation préalable
     if (!user || !user.resetToken || !user.resetTokenExpiry) {
       return res.status(400).json({ message: 'Code invalide ou expiré' });
     }
 
+    // On compare le code saisi par l'utilisateur avec les 6 premiers caractères du token stocké
     const expectedCode = user.resetToken.substring(0, 6).toUpperCase();
     if (code.toUpperCase() !== expectedCode) {
       return res.status(400).json({ message: 'Code invalide' });
     }
 
+    // On s'assure que l'heure actuelle ne dépasse pas la date d'expiration
     if (new Date() > user.resetTokenExpiry) {
       return res.status(400).json({ message: 'Code expiré' });
     }
 
+    // On hache le nouveau mot de passe avec bcrypt avant de le stocker
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
+    // On remplace le mot de passe et on remet le token à 'null' pour qu'il ne puisse plus jamais être réutilisé
     await prisma.user.update({
       where: { email },
       data: { password: hashedPassword, resetToken: null, resetTokenExpiry: null },

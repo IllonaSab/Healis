@@ -17,12 +17,16 @@ function logError(route, error, userId = 'anonymous') {
 router.get('/', async (req, res) => {
   try {
     const userId = req.userId;
+    // On extrait le paramètre optionnel 'date' depuis l'URL
     const { date } = req.query;
 
+    // Si aucune date n'est transmise, on prend par défaut le jour même
     const dateStr = date || new Date().toISOString().split('T')[0];
+    // On délimite le début (00h00) et la fin (23h59) de la journée sélectionnée
     const startOfDay = new Date(`${dateStr}T00:00:00.000Z`);
     const endOfDay = new Date(`${dateStr}T23:59:59.999Z`);
 
+    // On récupère tous les repas de l'utilisateur compris entre ces deux heures, triés du matin au soir ('asc' = croissant)
     const mealLogs = await prisma.mealLog.findMany({
       where: { userId, date: { gte: startOfDay, lte: endOfDay } },
       orderBy: { date: 'asc' },
@@ -45,6 +49,7 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ message: 'mealType et title sont requis' });
     }
 
+    // Création du repas en base de données
     const mealLog = await prisma.mealLog.create({
       data: {
         userId,
@@ -69,6 +74,7 @@ router.patch('/:id', async (req, res) => {
     const { id } = req.params;
     const { title, description, eaten } = req.body;
 
+    // Astuce JS : '...(champ !== undefined && { champ })' permet de ne mettre à jour en base que les champs réellement envoyés dans la requête
     const mealLog = await prisma.mealLog.update({
       where: { id },
       data: {
@@ -88,7 +94,9 @@ router.patch('/:id', async (req, res) => {
 // DELETE /meal-logs/:id
 router.delete('/:id', async (req, res) => {
   try {
+    // Suppression de l'élément ciblé par son identifiant unique
     await prisma.mealLog.delete({ where: { id: req.params.id } });
+    // 204 signale au client que la suppression s'est bien passée sans renvoyer de données superflues
     res.status(204).send();
   } catch (error) {
     logError('DELETE /meal-logs/:id', error, req.userId);
