@@ -24,7 +24,7 @@ router.get('/', async (req, res) => {
     // Si la base de données ne trouve rien, on utilise une liste de phrases de secours écrites à l'avance
     if (!phrase) {
       const FALLBACK = [
-        "Tu fais du mieux que tu peux, et c'est suffisant.",
+        "Tu fais du mieux que tu peux, et c est suffisant.",
         "Chaque journée est une nouvelle chance de prendre soin de toi.",
         "Tu n'es pas seul(e) dans ce chemin.",
         "La guérison n'est pas linéaire, et c'est normal.",
