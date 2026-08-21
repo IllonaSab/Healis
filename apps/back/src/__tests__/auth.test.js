@@ -20,7 +20,6 @@ let authToken = '';
 
 // Regrouper visuellement une suite de tests
 describe('Auth — /auth/register', () => {
-  console.log('DB URL:', process.env.DATABASE_URL);
 
   // 'it' décrit un scénario précis
   it('devrait créer un compte avec email/password/firstName', async () => {
@@ -28,7 +27,6 @@ describe('Auth — /auth/register', () => {
       .post('/auth/register') // On envoie une requête POST
       .send({ email: testEmail, password: testPassword, firstName: 'Test' });
 
-    console.log('Response body:', res.body);
 
     expect(res.status).toBe(201);  // Le code HTTP 201 (Created / Ressource créée avec succès)
     expect(res.body).toHaveProperty('token'); // La réponse contient bien la clé "token"

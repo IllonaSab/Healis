@@ -1,5 +1,5 @@
 // Charge les variables spécifiques à l'environnement de test (base de données de test, etc.) depuis le fichier .env.test
-require('dotenv').config({ path: '.env.test' });
+if (!process.env.CI) require('dotenv').config({ path: '.env.test' });
 
 const { prisma } = require('./db.js');
 
