@@ -6,4 +6,4 @@ node_modules
 
 /generated/prisma
 
-echo ".env.test" >> apps/back/.gitignore
+
