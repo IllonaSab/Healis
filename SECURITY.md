@@ -1,53 +1,23 @@
-# Sécurité — Healis
+# Sécurité & Accessibilité — Healis
 
-## Mesures de sécurité OWASP Top 10
+Healis traite des **données de santé** (art. 9 RGPD). Référentiels : OWASP Top 10 (2021), RGPD, WCAG 2.2 AA. Les écarts ci-dessous sont issus d'un audit du code.
 
-### A01 — Contrôle d'accès défaillant
-- Toutes les routes sensibles sont protégées par le middleware `authMiddleware`
-- Vérification du JWT à chaque requête
-- Données isolées par `userId` — un utilisateur ne peut accéder qu'à ses propres données
+| | En place | À corriger |
+|---|---|---|
+| **A01** Contrôle d'accès | `authMiddleware`, `userId` issu du JWT, UUID v4, filtrage `where: { userId }` en lecture | Propriété non vérifiée sur 6 routes `:id` — dont `GET /chat/conversation/:id` |
+| **A02** Cryptographie | bcrypt 10 rounds, JWT 256 bits, `expo-secure-store`, TLS, Stripe hébergé | `algorithms` non contraint sur `jwt.verify` |
+| **A03** Injection | Prisma partout, pages HTML statiques, system prompt serveur non exposé | Historique de chat fourni par le client |
+| **A04** Conception | Ni poids ni calories au schéma, prompt éthique strict, orientation vers un professionnel | Premium sans validation médicale |
+| **A05** Configuration | Secrets en variables d'env, environnements séparés, `.env.test` corrigé et secrets rotés | `helmet` absent, CORS ouvert, `error.message` renvoyé au client |
+| **A06** Dépendances | Versions figées, lockfile versionné, `npm audit`, Dependabot | `nodemailer` résiduel |
+| **A07** Authentification | Erreurs non discriminantes, code de reset à usage unique | Aucun rate limiting ; audience du jeton Google non vérifiée |
+| **A08** Intégrité | CI bloquante, secrets GitHub, actions épinglées | `npm install` au lieu de `npm ci` |
+| **A09** Journalisation | Logs JSON structurés, sondes `/health`, alertes email ; ni `body` ni `headers` journalisés | Rétention limitée, pas d'alerte sur échecs d'auth |
+| **A10** SSRF | URL sortantes codées en dur, aucun import par URL | — |
 
-### A02 — Défaillances cryptographiques
-- Mots de passe hashés avec `bcrypt` (salt rounds : 10)
-- JWT signé avec un secret fort (256 bits générés via `crypto.randomBytes`)
-- Token stocké côté mobile dans `expo-secure-store` (keychain iOS)
+**RGPD** — Hébergement **Paris** (Supabase `eu-west-3`) et **Mistral France** : aucun transfert de données de santé hors UE. Minimisation respectée, cascades `onDelete` en place.
+Manquent la **suppression de compte** (art. 17) et le **recueil du consentement** (art. 9) : ce sont les deux correctifs prioritaires.
 
-### A03 — Injection
-- Prisma ORM utilisé pour toutes les requêtes — pas de SQL brut
-- Requêtes paramétrées automatiquement par Prisma
-
-### A05 — Mauvaise configuration de sécurité
-- Variables sensibles dans `.env` (non commité — présent dans `.gitignore`)
-- CORS configuré sur le backend Express
-- En-têtes HTTP sécurisés via Express
-
-### A06 — Composants vulnérables
-- Dépendances auditées via `npm audit`
-- Mises à jour régulières des packages
-
-### A07 — Échecs d'identification et d'authentification
-- JWT avec expiration 7 jours
-- Pas de stockage du mot de passe en clair
-- Validation des champs email/password avant traitement
-
-### A09 — Échecs de journalisation
-- Logs d'erreurs sur les routes backend
-- Amélioration prévue : logging centralisé en production
-
----
-
-## Accessibilité
-
-### Référentiel choisi : WCAG 2.1 (appliqué à React Native)
-
-### Mesures appliquées dans les composants
-
-- **`Button.jsx`** — `accessible={true}`, `accessibilityLabel`, `accessibilityRole="button"`, `accessibilityState={{ disabled }}`
-- **`Input.jsx`** — `accessible={true}`, `accessibilityLabel`, `accessibilityRole="search"`
-- **Contrastes** — couleur principale `#15804C` sur fond blanc : ratio > 4.5:1 (conforme WCAG AA)
-- **Tailles de police** — minimum 12px, textes principaux 14-18px
-- **Zones tactiles** — minimum 44x44px sur tous les boutons (recommandation Apple HIG)
-
-### Limitations identifiées
-- Lecteur d'écran non testé (VoiceOver iOS)
-- Navigation au clavier non applicable (app mobile)
+**Accessibilité** — Contraste `#15804C` à 4,97:1 (AA), `EmojiCard` conforme au critère 1.4.1, rôles et libellés déclarés sur les composants.
+Trois écarts : `accessibilityRole="search"` sur les champs texte, `minHeight` absent sur `Button` (29–45 px), streak masqué après 5 s sans prolongation possible.
+VoiceOver et TalkBack restent à tester.
