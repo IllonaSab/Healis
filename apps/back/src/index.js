@@ -39,6 +39,8 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+app.get('/', (req, res) => res.json({ service: 'Healis API', status: 'ok' }));
+
 // Route de diagnostic : vérifie que le serveur arrive bien à joindre la base de données en effectuant une requête simple 
 app.get('/health/db', async (req, res) => {
   try {
