@@ -31,9 +31,8 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/healis_test
-      JWT_SECRET: test_secret_for_ci_only
+      JWT_SECRET: ${{ secrets.CI_JWT_SECRET }}
       MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
-      NODE_OPTIONS: --experimental-vm-modules
 
     steps:
       - name: Checkout code
@@ -46,7 +45,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Generate Prisma Client
         working-directory: apps/back
@@ -58,3 +57,7 @@ jobs:
 
       - name: Run tests
         run: npx jest --testPathPatterns=apps/back/src/__tests__ --rootDir=apps/back
+
+      - name: Audit des dépendances
+        run: npm audit --audit-level=high
+        continue-on-error: true
