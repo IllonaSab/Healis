@@ -2,6 +2,8 @@ node_modules
 # Keep environment variables out of version control
 .env
 
+.env.test
+
 /generated/prisma
 
 echo ".env.test" >> apps/back/.gitignore
